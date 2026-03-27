@@ -1513,7 +1513,8 @@ const tabsEl = document.getElementById('tabs');
 const allTab = document.createElement('div');
 allTab.className = 'tab active';
 allTab.dataset.key = 'all';
-allTab.innerHTML = 'All<span class="count">443</span>';
+const totalPhotoCat = photographerKeys.reduce((s,k)=>s+photographerData[k].length,0) + categoryKeys.reduce((s,k)=>s+categoryData[k].length,0);
+allTab.innerHTML = 'All<span class="count">' + (totalPhotoCat + similarFindsKeys.reduce((s,k)=>s+similarFindsData[k].length,0) + researchBoardsKeys.reduce((s,k)=>s+researchBoardsData[k].length,0)) + '</span>';
 allTab.onclick = () => switchTab('all');
 tabsEl.appendChild(allTab);
 
@@ -1625,7 +1626,7 @@ function renderContent() {
         });
 
         currentUrls = allUrls.filter(u => !deletedUrls.has(u));
-        const totalAll = 443 + similarFindsKeys.reduce((s, k) => s + similarFindsData[k].length, 0) + researchBoardsKeys.reduce((s, k) => s + researchBoardsData[k].length, 0);
+        const totalAll = photographerKeys.reduce((s,k)=>s+photographerData[k].length,0) + categoryKeys.reduce((s,k)=>s+categoryData[k].length,0) + similarFindsKeys.reduce((s, k) => s + similarFindsData[k].length, 0) + researchBoardsKeys.reduce((s, k) => s + researchBoardsData[k].length, 0);
         const totalRemaining = totalAll - deletedUrls.size;
         document.getElementById('stats').textContent = totalRemaining + ' images' +
             (deletedUrls.size > 0 ? ' (' + deletedUrls.size + ' removed)' : '');
@@ -2384,14 +2385,31 @@ document.querySelectorAll('.view-btn').forEach(btn => {
     };
 });
 
-// Load persisted deletions from localStorage
+// Build a set of ALL current image URLs so we can validate localStorage
+const allCurrentUrls = new Set();
+for (const v of Object.values(photographerData)) v.forEach(u => allCurrentUrls.add(u));
+for (const v of Object.values(categoryData)) v.forEach(u => allCurrentUrls.add(u));
+for (const v of Object.values(similarFindsData)) v.forEach(u => allCurrentUrls.add(u));
+for (const v of Object.values(researchBoardsData)) v.forEach(u => allCurrentUrls.add(u));
+
+// Load persisted deletions from localStorage — but only keep URLs that exist in current data
+// This prevents stale deletions from a previous file version from corrupting the view
 try {
     const saved = localStorage.getItem('belnu_review_deleted');
     if (saved) {
         const arr = JSON.parse(saved);
-        arr.forEach(u => deletedUrls.add(u));
+        arr.forEach(u => { if (allCurrentUrls.has(u)) deletedUrls.add(u); });
+        // If none of the saved URLs matched current data, clear the stale localStorage
+        if (deletedUrls.size === 0 && arr.length > 0) {
+            localStorage.removeItem('belnu_review_deleted');
+        }
     }
 } catch(e) {}
+
+// Ensure we always start in normal view mode (never stuck in curate)
+deleteMode = false;
+document.body.classList.remove('delete-mode');
+
 refreshUpdateBtn();
 
 // Initial render
