@@ -1482,6 +1482,103 @@ const selectReferenceUrls = new Set([
 ]);
 
 // Reference/seed images that triggered find-similar searches
+const similarFindsData = {};
+const researchBoardsData = {
+    "Les Collection": [
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/12_858a12df-6d31-4471-a474-063691b3c3d3.png?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/DSC04870_8b0714cd-b381-446e-b72a-f8135c5fac9b.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/60_7c8edc7a-47f5-480a-aa8a-31233c5b0127.png?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/61_786a21c4-f8cb-4361-9722-922b61911663.png?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/14_5926d2d2-d610-49a1-81be-0ec3481c4f20.png?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/13_db5e0215-9731-4b4e-a6df-b71c7d4d5bf2.png?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/35_8b6b404b-78fb-47cb-8fe2-8fc9876a0fa2.png?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/17_b6640b71-aee3-4e74-ac1c-b03a4c40bfce.png?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Bud_Bloom_2_tania_whalen_2024.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Bud_Bloom_1_tania_whalen_2024.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/In_Progress_And_Alive_sasha_court.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Pretty_And_Gritty_sasha_court.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Braid_And_Comb_Candle_Holder_Set_stephanie_trowbridge.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Ribbon_Vase_Moss_Green_maggie_wells.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Ribbon_Vase_Cream_maggie_wells.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Ribbon_Vase_Sky_Blue_maggie_wells.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Midsummer_Dreams_stephanie_trowbridge.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/DSC04826.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/DSC04830.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/DSC04840.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Bulb_Vase_II_tania_whalen_2024.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Bulb_Vase_I_tania_whalen_2024.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/DSC04886.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/DSC04890.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/DSC04879.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/DSC04856.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Antler_Candle_Holder_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Hand_Mirror_with_Rope_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Moon_Phase_Bowl_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Horn_Candlestick_cinnamon_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Pillar_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Tripod_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Rope_and_Shell_Wall_Piece_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Organic_Vessel_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Heart_Vessel_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Large_Ceremonial_Bowl_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Nest_Bowl_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Shell_Bowl_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Rope_Vessel_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Footed_Cup_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Gourd_Vessel_II_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Gourd_Vessel_I_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Goddess_Candle_Holder_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Large_Fluted_Vase_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Small_Fluted_Vase_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Organic_Form_I_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Organic_Form_II_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Tall_Vessel_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Moon_Vase_joanna_mannis.jpg?width=1200",
+        "https://cdn.shopify.com/s/files/1/0565/5848/5662/files/Crinkle_Vase_joanna_mannis.jpg?width=1200"
+    ],
+    "Norm CPH": [
+        "https://normcph.com/wp-content/uploads/2025/01/STILL_27_1.1.28-1.jpg",
+        "https://normcph.com/wp-content/uploads/2025/12/Norm-Architects_TAMEKO-x-NORM_KTK_13-1.jpg",
+        "https://normcph.com/wp-content/uploads/2025/09/Norm-Architects_Echoes-of-Texture_JBP_2025_36_2.jpg",
+        "https://normcph.com/wp-content/uploads/2024/10/Brandt-Collective-X-Norm-Architects.jpg",
+        "https://normcph.com/wp-content/uploads/2024/02/Menu-Soft-Packs0904.jpg",
+        "https://normcph.com/wp-content/uploads/2024/02/NNDW_Cutlery_Location.02-2.jpg",
+        "https://normcph.com/wp-content/uploads/2024/02/NormArchitects_Ceramic_MaibritWurtz_03.jpg",
+        "https://normcph.com/wp-content/uploads/2025/02/DSC08020-3.jpg",
+        "https://normcph.com/wp-content/uploads/2023/10/normarchitects_groundcollection_lifestyle_03.jpg",
+        "https://normcph.com/wp-content/uploads/2023/10/normarchitects_groundcollection_product_01.jpg",
+        "https://normcph.com/wp-content/uploads/2023/06/Norm-Architects_Shore-Collection-by-Menu_01.jpg",
+        "https://normcph.com/wp-content/uploads/2023/06/Norm-Architects_Shore-Collection-by-Menu_05.jpg",
+        "https://normcph.com/wp-content/uploads/2022/11/Norm-Architects_Terra-Collection_Audo_02.jpg",
+        "https://normcph.com/wp-content/uploads/2022/11/Norm-Architects_Terra-Collection_Audo_05.jpg",
+        "https://normcph.com/wp-content/uploads/2022/08/Norm-Architects_Woven-Matter_GAN_07.jpg",
+        "https://normcph.com/wp-content/uploads/2022/08/Norm-Architects_Woven-Matter_GAN_01.jpg",
+        "https://normcph.com/wp-content/uploads/2021/12/Norm-Architects_Fane-Collection_01.jpg",
+        "https://normcph.com/wp-content/uploads/2021/12/Norm-Architects_Fane-Collection_05.jpg",
+        "https://normcph.com/wp-content/uploads/2021/05/Norm-Architects_MG407-Brass-Sculpture_01.jpg",
+        "https://normcph.com/wp-content/uploads/2021/05/Norm-Architects_MG407-Brass-Sculpture_03.jpg",
+        "https://normcph.com/wp-content/uploads/2020/09/Norm-Architects_TOTEM_Piet-Hein-Eek_01.jpg",
+        "https://normcph.com/wp-content/uploads/2020/09/Norm-Architects_TOTEM_Piet-Hein-Eek_04.jpg",
+        "https://normcph.com/wp-content/uploads/2019/11/Norm-Architects_Marble-Stepping-Stone_01.jpg",
+        "https://normcph.com/wp-content/uploads/2018/10/Norm-Architects_VAULT_Audo_01.jpg",
+        "https://normcph.com/wp-content/uploads/2016/03/Norm-Architects_Shaker-Tray_Furnishing-Utopia_01.jpg",
+        "https://normcph.com/wp-content/uploads/2015/06/Norm-Architects_Folk-Ladder_DWR_01.jpg",
+        "https://normcph.com/wp-content/uploads/2017/05/Norm-Architects_Duomo-Rug_cc-tapis_01.jpg",
+        "https://normcph.com/wp-content/uploads/2024/01/DSC08275-2.jpg",
+        "https://normcph.com/wp-content/uploads/2024/01/DSC07925-copy-3.jpg",
+        "https://normcph.com/wp-content/uploads/2024/02/Norm-Architects_FOLK-LADDER_DWR_01_thumb.jpg"
+    ],
+    "Loewe": [
+        "https://www.loewe.com/dw/image/v2/BBPC_PRD/on/demandware.static/-/Library-Sites-LOW_SharedLibrary/default/dw420b15d3/000000%201%20SS26/PRODUCTS/LOEWE_SS26_MAIN_CAMPAIGN_STILL_LIFE_sRGB_CROPPED_4_2000x3000%201%20(1).jpg",
+        "https://www.loewe.com/dw/image/v2/BBPC_PRD/on/demandware.static/-/Library-Sites-LOW_SharedLibrary/default/dw7bdbc477/000001%20GISELLE%20PROJECT/LOEWE_2023_GISELLE_MAKING_OF_RGB_CROPPED_2880x1620_19.jpg",
+        "https://www.loewe.com/dw/image/v2/BBPC_PRD/on/demandware.static/-/Library-Sites-LOW_SharedLibrary/default/dwfcb5c835/00000%201%20POJECT%20AMERICANA/LOEWE_2025_AMERICANA_HIVE_PARKWOOD_RGB_LOOK_1_CROPPED_2250X3000_1.jpg",
+        "https://www.loewe.com/dw/image/v2/BBPC_PRD/on/demandware.static/-/Library-Sites-LOW_SharedLibrary/default/dw9a773721/00000%20FW25%20RUNWAY%20COLLECTION/CAMPAIGN/LOEWE_FW25_MAIN_CAMPAIGN_RAFFEY_CASSIDY_CROPPED_2250X3000_2.jpg",
+        "https://www.loewe.com/dw/image/v2/BBPC_PRD/on/demandware.static/-/Library-Sites-LOW_SharedLibrary/default/dw5674874f/0000000001%20How%20to%20pronounce/DECADES%20OF%20CONFUSION/LOEWE_HTP_BRAND_CAMPAIGN_2024_BTS_RGB_CROPPED_2250X3000_33.jpg",
+        "https://www.loewe.com/dw/image/v2/BBPC_PRD/on/demandware.static/-/Library-Sites-LOW_SharedLibrary/default/dw25461f7b/00000%20TOKYO%20BRAND%20EXHIBITION/LOEWE_2023_SHANGAI_EXHIBITION_KV_RGB_CROPPED_2250X3000_02_V2.jpg",
+        "https://www.loewe.com/dw/image/v2/BBPC_PRD/on/demandware.static/-/Library-Sites-LOW_SharedLibrary/default/dw26576df1/0000000001%20IWD/IMG_2273_2250x3000.jpg",
+        "https://www.loewe.com/dw/image/v2/BBPC_PRD/on/demandware.static/-/Library-Sites-LOW_SharedLibrary/default/dw79562467/0000000%201%20SS24%20MEN%27S%20SHOW/LUCA%20GUADAGNINO/LOEWE_SS24_MENS_SHOW_LG_TEASER_RGB_CROPPED_2250X3000_32.jpg"
+    ]
+};
 const allData = {};
 const photographerKeys = Object.keys(photographerData);
 const categoryKeys = Object.keys(categoryData);
@@ -1513,8 +1610,7 @@ const tabsEl = document.getElementById('tabs');
 const allTab = document.createElement('div');
 allTab.className = 'tab active';
 allTab.dataset.key = 'all';
-const totalPhotoCat = photographerKeys.reduce((s,k)=>s+photographerData[k].length,0) + categoryKeys.reduce((s,k)=>s+categoryData[k].length,0);
-allTab.innerHTML = 'All<span class="count">' + (totalPhotoCat + similarFindsKeys.reduce((s,k)=>s+similarFindsData[k].length,0) + researchBoardsKeys.reduce((s,k)=>s+researchBoardsData[k].length,0)) + '</span>';
+allTab.innerHTML = 'All<span class="count">443</span>';
 allTab.onclick = () => switchTab('all');
 tabsEl.appendChild(allTab);
 
@@ -1626,7 +1722,7 @@ function renderContent() {
         });
 
         currentUrls = allUrls.filter(u => !deletedUrls.has(u));
-        const totalAll = photographerKeys.reduce((s,k)=>s+photographerData[k].length,0) + categoryKeys.reduce((s,k)=>s+categoryData[k].length,0) + similarFindsKeys.reduce((s, k) => s + similarFindsData[k].length, 0) + researchBoardsKeys.reduce((s, k) => s + researchBoardsData[k].length, 0);
+        const totalAll = 443 + similarFindsKeys.reduce((s, k) => s + similarFindsData[k].length, 0) + researchBoardsKeys.reduce((s, k) => s + researchBoardsData[k].length, 0);
         const totalRemaining = totalAll - deletedUrls.size;
         document.getElementById('stats').textContent = totalRemaining + ' images' +
             (deletedUrls.size > 0 ? ' (' + deletedUrls.size + ' removed)' : '');
@@ -2385,31 +2481,14 @@ document.querySelectorAll('.view-btn').forEach(btn => {
     };
 });
 
-// Build a set of ALL current image URLs so we can validate localStorage
-const allCurrentUrls = new Set();
-for (const v of Object.values(photographerData)) v.forEach(u => allCurrentUrls.add(u));
-for (const v of Object.values(categoryData)) v.forEach(u => allCurrentUrls.add(u));
-for (const v of Object.values(similarFindsData)) v.forEach(u => allCurrentUrls.add(u));
-for (const v of Object.values(researchBoardsData)) v.forEach(u => allCurrentUrls.add(u));
-
-// Load persisted deletions from localStorage — but only keep URLs that exist in current data
-// This prevents stale deletions from a previous file version from corrupting the view
+// Load persisted deletions from localStorage
 try {
     const saved = localStorage.getItem('belnu_review_deleted');
     if (saved) {
         const arr = JSON.parse(saved);
-        arr.forEach(u => { if (allCurrentUrls.has(u)) deletedUrls.add(u); });
-        // If none of the saved URLs matched current data, clear the stale localStorage
-        if (deletedUrls.size === 0 && arr.length > 0) {
-            localStorage.removeItem('belnu_review_deleted');
-        }
+        arr.forEach(u => deletedUrls.add(u));
     }
 } catch(e) {}
-
-// Ensure we always start in normal view mode (never stuck in curate)
-deleteMode = false;
-document.body.classList.remove('delete-mode');
-
 refreshUpdateBtn();
 
 // Initial render
