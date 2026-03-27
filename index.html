@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BELNU Image Atelier — Full Image Review</title>
+    <style>
+        @font-face {
+            font-family: 'ABC Arizona Serif';
+            src: url('ABCArizonaSerif-Light.woff') format('woff');
+            font-weight: 300;
+            font-style: normal;
+        }
+
+        /* Global: all text uppercase */
+        * { text-transform: uppercase; }
+        textarea, input, .gs-note, .fs-note { text-transform: none; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0a0a0a;
+            border-bottom: none;
+            padding: 16px 24px 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            font-family: 'ABC Arizona Serif', Georgia, serif;
+            font-size: 1.05em;
+            font-weight: 300;
+            letter-spacing: 1.2px;
+            color: #ffffff;
+        }
+
+        .header .stats {
+            font-size: 0.64em;
+            color: #666;
+            letter-spacing: 0.4px;
+        }
+
+        .section-row {
+            display: flex;
+            gap: 0;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            scrollbar-width: thin;
+            scrollbar-color: #333 transparent;
+        }
+
+        .section-row::-webkit-scrollbar { height: 4px; }
+        .section-row::-webkit-scrollbar-track { background: transparent; }
+        .section-row::-webkit-scrollbar-thumb { background: #333; border-radius: 0; }
+
+        .tab {
+            flex-shrink: 0;
+            padding: 6px 16px;
+            font-size: 0.56em;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab:hover { color: #aaa; }
+        .tab.active { color: #ffffff; border-bottom-color: #ffffff; }
+        .tab .count { color: #444; margin-left: 4px; }
+        .tab.active .count { color: #999; }
+
+        .tab.photographer { font-weight: 500; }
+
+        .divider-tab {
+            flex-shrink: 0;
+            padding: 6px 12px;
+            font-size: 0.49em;
+            letter-spacing: 0.8px;
+            color: #333;
+            border-left: 1px solid #222;
+            margin-left: 6px;
+            padding-left: 18px;
+            cursor: default;
+            text-transform: uppercase;
+        }
+
+        .content { padding: 24px; }
+
+        .section-title {
+            font-size: 0.56em;
+            font-weight: 300;
+            letter-spacing: 0.4px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            position: relative;
+            border-radius: 0;
+            overflow: hidden;
+            background: #141414;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: scale(1.02); }
+
+        .card img {
+            width: 100%;
+            display: block;
+            min-height: 180px;
+            object-fit: cover;
+            background: #1a1a1a;
+        }
+
+        .card .label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 6px 10px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            font-size: 0.52em;
+            color: #999;
+            letter-spacing: 0.2px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .card:hover .label { opacity: 1; }
+
+        .card .select-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 5px 10px;
+            background: #ffffff;
+            font-size: 0.49em;
+            font-weight: 600;
+            color: #0a0a0a;
+            letter-spacing: 0.8px;
+            text-align: center;
+            opacity: 1;
+            z-index: 2;
+        }
+        .card.is-select .label { bottom: 22px; }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 200;
+            flex-direction: column;
+        }
+        .lightbox.open { display: flex; }
+
+        .lb-image-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            padding: 40px 60px 16px;
+        }
+
+        .lb-image-area img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 0;
+            transition: transform 0.2s ease;
+            transform-origin: center center;
+        }
+
+        .lightbox .close {
+            position: absolute;
+            top: 16px; right: 20px;
+            font-size: 1.35em;
+            color: #555;
+            cursor: pointer;
+            transition: color 0.2s;
+            z-index: 10;
+        }
+        .lightbox .close:hover { color: #fff; }
+
+        .lightbox .nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: #444;
+            cursor: pointer;
+            padding: 20px;
+            transition: color 0.2s;
+            user-select: none;
+            z-index: 10;
+        }
+        .lightbox .nav:hover { color: #fff; }
+        .lightbox .prev { left: 10px; }
+        .lightbox .next { right: 10px; }
+
+        /* Lightbox bottom toolbar */
+        .lb-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: #111;
+            border-top: 1px solid #222;
+            flex-shrink: 0;
+            gap: 16px;
+        }
+
+        .lb-toolbar-left,
+        .lb-toolbar-center,
+        .lb-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .lb-toolbar-left { flex: 1; justify-content: flex-start; }
+        .lb-toolbar-center { flex: 0; justify-content: center; }
+        .lb-toolbar-right { flex: 1; justify-content: flex-end; }
+
+        .lb-toolbar .info {
+            font-size: 0.6em;
+            color: #555;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+
+        .lb-btn {
+            padding: 6px 16px;
+            font-size: 0.58em;
+            letter-spacing: 0.2px;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            border: 1px solid;
+            background: none;
+            white-space: nowrap;
+        }
+        .lb-btn-find {
+            color: #999;
+            border-color: rgba(212,165,116,0.25);
+            background: rgba(212,165,116,0.06);
+        }
+        .lb-btn-find:hover { color: #ffffff; border-color: #ffffff; background: rgba(255,255,255,0.12); }
+        .lb-btn-generate {
+            color: #999;
+            border-color: rgba(130,180,140,0.25);
+            background: rgba(130,180,140,0.06);
+        }
+        .lb-btn-generate:hover { color: #82b48c; border-color: #82b48c; background: rgba(130,180,140,0.12); }
+        .lb-btn-remove {
+            color: #666;
+            border-color: rgba(192,57,43,0.2);
+            background: rgba(192,57,43,0.06);
+            display: none;
+        }
+        .lb-btn-remove:hover { color: #e74c3c; border-color: #c0392b; background: rgba(192,57,43,0.15); }
+        body.delete-mode .lb-btn-remove { display: inline-flex; }
+
+        /* Zoom controls */
+        .lb-zoom {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .lb-zoom-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 0;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #888;
+            font-size: 0.83em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        .lb-zoom-btn:hover { border-color: #555; color: #ccc; }
+        .lb-zoom-level {
+            font-size: 0.54em;
+            color: #555;
+            min-width: 36px;
+            text-align: center;
+            letter-spacing: 0.2px;
+        }
+
+        /* View toggle */
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .view-btn {
+            padding: 4px 12px;
+            font-size: 0.56em;
+            letter-spacing: 0.4px;
+            color: #666;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .view-btn:hover { border-color: #555; color: #aaa; }
+        .view-btn.active { border-color: #ffffff; color: #ffffff; }
+
+        .grid.large { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); }
+        .grid.small { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+
+        .loading-placeholder {
+            background: #1a1a1a;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-size: 0.6em;
+        }
+
+        /* Delete mode */
+        .card .select-check {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 0;
+            border: 2px solid rgba(255,255,255,0.4);
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.15s;
+            font-size: 10.5px;
+            color: transparent;
+        }
+        body.delete-mode .card .select-check { display: flex; }
+        body.delete-mode .card:hover .select-check { border-color: rgba(255,255,255,0.7); }
+        .card.selected .select-check {
+            background: #c0392b;
+            border-color: #c0392b;
+            color: #fff;
+        }
+        body.delete-mode .card { cursor: crosshair; }
+        body.delete-mode .card:hover { transform: none; }
+        .card.selected { opacity: 0.35; }
+        .card.selected img { filter: grayscale(1); }
+
+        .delete-toggle {
+            padding: 4px 14px;
+            font-size: 0.56em;
+            letter-spacing: 0.4px;
+            color: #666;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .delete-toggle:hover { border-color: #555; color: #aaa; }
+        .delete-toggle.active { border-color: #c0392b; color: #c0392b; }
+
+        .action-bar {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 150;
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+            padding: 12px 24px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .action-bar.visible { display: flex; }
+
+        .action-bar .selection-info {
+            font-size: 0.64em;
+            color: #999;
+            letter-spacing: 0.2px;
+        }
+        .action-bar .selection-info strong { color: #c0392b; }
+
+        .action-bar .actions { display: flex; gap: 10px; }
+
+        .action-btn {
+            padding: 8px 20px;
+            font-size: 0.6em;
+            letter-spacing: 0.2px;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .btn-delete {
+            background: #c0392b;
+            color: #fff;
+        }
+        .btn-delete:hover { background: #e74c3c; }
+        .btn-cancel {
+            background: #333;
+            color: #ccc;
+        }
+        .btn-cancel:hover { background: #444; }
+        .btn-select-all {
+            background: none;
+            color: #999;
+            border: 1px solid #444;
+        }
+        .btn-select-all:hover { border-color: #666; color: #ccc; }
+
+        /* Undo toast */
+        .undo-toast {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 0;
+            padding: 12px 20px;
+            z-index: 160;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.64em;
+            color: #ccc;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .undo-toast.visible { display: flex; }
+        .undo-toast .undo-btn {
+            color: #ffffff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.75em;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .undo-toast .undo-btn:hover { color: #e8c49a; }
+
+        /* ── Find Similar ── */
+
+        .card .similar-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 2px 8px;
+            font-size: 0.45em;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            background: rgba(212,165,116,0.85);
+            color: #111;
+            border-radius: 0;
+            font-weight: 600;
+            display: none;
+            z-index: 5;
+        }
+        .card.has-request .similar-badge { display: block; }
+
+        /* Find Similar Modal */
+        .fs-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+        }
+        .fs-overlay.open { display: flex; }
+
+        .fs-modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 0;
+            width: 460px;
+            max-width: 92vw;
+            overflow: hidden;
+        }
+
+        .fs-modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid #222;
+        }
+        .fs-modal-header h3 {
+            font-size: 0.75em;
+            font-weight: 400;
+            letter-spacing: 0.6px;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+        .fs-modal-header .fs-subtitle {
+            font-size: 0.56em;
+            color: #666;
+        }
+
+        .fs-modal-thumb {
+            padding: 16px 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: #141414;
+        }
+        .fs-modal-thumb img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0;
+            background: #222;
+        }
+        .fs-modal-thumb .fs-source {
+            font-size: 0.6em;
+            color: #888;
+        }
+        .fs-modal-thumb .fs-source strong {
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .fs-modal-body { padding: 20px 24px; }
+
+        .fs-field { margin-bottom: 20px; }
+        .fs-field label {
+            display: block;
+            font-size: 0.56em;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .fs-count-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .fs-count-row input[type="range"] {
+            flex: 1;
+            accent-color: #ffffff;
+            height: 4px;
+        }
+        .fs-count-row .fs-count-val {
+            font-size: 0.98em;
+            color: #ffffff;
+            font-weight: 300;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .fs-radio-group { display: flex; gap: 10px; }
+        .fs-radio {
+            flex: 1;
+            padding: 10px 14px;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .fs-radio:hover { border-color: #555; }
+        .fs-radio.selected { border-color: #ffffff; background: rgba(255,255,255,0.08); }
+        .fs-radio .fs-radio-title {
+            font-size: 0.6em;
+            color: #ccc;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .fs-radio.selected .fs-radio-title { color: #ffffff; }
+        .fs-radio .fs-radio-desc {
+            font-size: 0.49em;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .fs-note {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 0;
+            color: #ccc;
+            font-family: inherit;
+            font-size: 0.6em;
+            padding: 8px 12px;
+            resize: vertical;
+            min-height: 48px;
+        }
+        .fs-note:focus { outline: none; border-color: #ffffff; }
+        .fs-note::placeholder { color: #555; }
+
+        .fs-modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #222;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .fs-btn {
+            padding: 8px 20px;
+            font-size: 0.6em;
+            letter-spacing: 0.2px;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .fs-btn-cancel { background: #333; color: #ccc; }
+        .fs-btn-cancel:hover { background: #444; }
+        .fs-btn-submit { background: #ffffff; color: #111; font-weight: 500; }
+        .fs-btn-submit:hover { background: #e8c49a; }
+
+        /* Queue drawer */
+        .queue-toggle {
+            padding: 4px 14px;
+            font-size: 0.56em;
+            letter-spacing: 0.4px;
+            color: #666;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            position: relative;
+        }
+        .queue-toggle:hover { border-color: #555; color: #aaa; }
+        .queue-toggle.has-items { border-color: #ffffff; color: #ffffff; }
+        .queue-toggle .q-badge {
+            display: none;
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 16px;
+            height: 16px;
+            border-radius: 0;
+            background: #ffffff;
+            color: #111;
+            font-size: 0.52em;
+            font-weight: 700;
+            line-height: 16px;
+            text-align: center;
+        }
+        .queue-toggle.has-items .q-badge { display: block; }
+
+        .queue-drawer {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 380px;
+            max-width: 90vw;
+            background: #141414;
+            border-left: 1px solid #2a2a2a;
+            z-index: 180;
+            flex-direction: column;
+            box-shadow: -4px 0 30px rgba(0,0,0,0.5);
+        }
+        .queue-drawer.open { display: flex; }
+
+        .queue-drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .queue-drawer-header h3 {
+            font-size: 0.68em;
+            font-weight: 400;
+            letter-spacing: 0.6px;
+            color: #ffffff;
+        }
+        .queue-drawer-close {
+            color: #666;
+            cursor: pointer;
+            font-size: 1.05em;
+            background: none;
+            border: none;
+            font-family: inherit;
+        }
+        .queue-drawer-close:hover { color: #fff; }
+
+        .queue-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .queue-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #252525;
+            border-radius: 0;
+            margin-bottom: 8px;
+            align-items: flex-start;
+        }
+        .queue-item img {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 0;
+            flex-shrink: 0;
+            background: #222;
+        }
+        .queue-item-info { flex: 1; min-width: 0; }
+        .queue-item-info .qi-section {
+            font-size: 0.52em;
+            color: #666;
+            letter-spacing: 0.2px;
+            margin-bottom: 2px;
+        }
+        .queue-item-info .qi-detail {
+            font-size: 0.58em;
+            color: #bbb;
+        }
+        .queue-item-info .qi-detail strong { color: #ffffff; font-weight: 500; }
+        .queue-item-info .qi-note {
+            font-size: 0.51em;
+            color: #555;
+            margin-top: 3px;
+            font-style: italic;
+        }
+        .queue-item-remove {
+            color: #555;
+            cursor: pointer;
+            font-size: 0.83em;
+            background: none;
+            border: none;
+            padding: 0 4px;
+            flex-shrink: 0;
+        }
+        .queue-item-remove:hover { color: #c0392b; }
+
+        .queue-drawer-footer {
+            padding: 16px;
+            border-top: 1px solid #222;
+            display: flex;
+            gap: 8px;
+        }
+        .queue-drawer-footer .fs-btn { flex: 1; text-align: center; }
+
+        .queue-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #444;
+            font-size: 0.6em;
+            letter-spacing: 0.2px;
+        }
+
+        /* ── Generate Similar Modal ── */
+        .gs-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 300;
+            justify-content: center;
+            align-items: center;
+        }
+        .gs-overlay.open { display: flex; }
+
+        .gs-modal {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 0;
+            width: 500px;
+            max-width: 92vw;
+            overflow: hidden;
+        }
+
+        .gs-modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid #222;
+        }
+        .gs-modal-header h3 {
+            font-size: 0.75em;
+            font-weight: 400;
+            letter-spacing: 0.6px;
+            color: #82b48c;
+            margin-bottom: 6px;
+        }
+        .gs-modal-header .gs-subtitle {
+            font-size: 0.56em;
+            color: #666;
+        }
+
+        .gs-modal-thumb {
+            padding: 16px 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: #141414;
+        }
+        .gs-modal-thumb img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0;
+            background: #222;
+        }
+        .gs-modal-thumb .gs-source {
+            font-size: 0.6em;
+            color: #888;
+        }
+        .gs-modal-thumb .gs-source strong {
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .gs-modal-body { padding: 20px 24px; }
+        .gs-field { margin-bottom: 20px; }
+        .gs-field label {
+            display: block;
+            font-size: 0.56em;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .gs-type-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .gs-type-card {
+            padding: 14px;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .gs-type-card:hover { border-color: #555; }
+        .gs-type-card.selected { border-color: #82b48c; background: rgba(130,180,140,0.08); }
+        .gs-type-card .gs-type-icon {
+            font-size: 1.05em;
+            margin-bottom: 6px;
+            display: block;
+            filter: grayscale(1) brightness(0.7);
+            transition: filter 0.15s;
+        }
+        .gs-type-card.selected .gs-type-icon { filter: none; }
+        .gs-type-card .gs-type-title {
+            font-size: 0.6em;
+            color: #ccc;
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+        .gs-type-card.selected .gs-type-title { color: #82b48c; }
+        .gs-type-card .gs-type-desc {
+            font-size: 0.49em;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .gs-fragrance-row {
+            display: none;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .gs-fragrance-row.visible { display: flex; }
+        .gs-frag-chip {
+            padding: 6px 14px;
+            font-size: 0.56em;
+            border-radius: 0;
+            border: 1px solid #333;
+            background: #222;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+        .gs-frag-chip:hover { border-color: #555; color: #ccc; }
+        .gs-frag-chip.selected { border-color: #82b48c; background: rgba(130,180,140,0.1); color: #82b48c; }
+
+        .gs-count-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .gs-count-row input[type="range"] {
+            flex: 1;
+            accent-color: #82b48c;
+            height: 4px;
+        }
+        .gs-count-row .gs-count-val {
+            font-size: 0.98em;
+            color: #82b48c;
+            font-weight: 300;
+            min-width: 32px;
+            text-align: center;
+        }
+
+        .gs-note {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 0;
+            color: #ccc;
+            font-family: inherit;
+            font-size: 0.6em;
+            padding: 8px 12px;
+            resize: vertical;
+            min-height: 48px;
+        }
+        .gs-note:focus { outline: none; border-color: #82b48c; }
+        .gs-note::placeholder { color: #555; }
+
+        .gs-modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #222;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .gs-btn {
+            padding: 8px 20px;
+            font-size: 0.6em;
+            letter-spacing: 0.2px;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+        .gs-btn-cancel { background: #333; color: #ccc; }
+        .gs-btn-cancel:hover { background: #444; }
+        .gs-btn-submit { background: #82b48c; color: #111; font-weight: 500; }
+        .gs-btn-submit:hover { background: #9ed1a7; }
+
+        /* Generate badge on cards */
+        .card .generate-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 2px 8px;
+            font-size: 0.45em;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            background: rgba(130,180,140,0.85);
+            color: #111;
+            border-radius: 0;
+            font-weight: 600;
+            display: none;
+            z-index: 4;
+        }
+        .card.has-generate .generate-badge { display: block; }
+        .card.has-request .similar-badge { left: auto; right: 8px; }
+        .card.has-generate.has-request .generate-badge { left: 8px; }
+
+        /* Update Collection button */
+        .update-collect-btn {
+            padding: 4px 14px;
+            font-size: 0.56em;
+            letter-spacing: 0.4px;
+            color: #666;
+            background: none;
+            border: 1px solid #333;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+        .update-collect-btn.has-changes {
+            display: inline-flex;
+            border-color: #d4a574;
+            color: #d4a574;
+        }
+        .update-collect-btn.has-changes:hover {
+            border-color: #e8c49a;
+            color: #e8c49a;
+            background: rgba(212,165,116,0.08);
+        }
+        .update-collect-btn .del-count {
+            font-size: 0.85em;
+            opacity: 0.75;
+        }
+    </style>
+</head>
+<body class="">
+
+<div class="top-bar">
+    <div class="header">
+        <h1>BELNU IMAGE ATELIER</h1>
+        <div style="display:flex;align-items:center;gap:20px;">
+            <div class="view-toggle">
+                <button class="view-btn" data-size="small">S</button>
+                <button class="view-btn active" data-size="medium">M</button>
+                <button class="view-btn" data-size="large">L</button>
+            </div>
+            <button class="delete-toggle active" id="deleteToggle" onclick="toggleDeleteMode()">EXIT CURATE</button>
+            <button class="update-collect-btn has-changes" id="updateCollectBtn" onclick="updateCollection()">UPDATE<span class="del-count" id="delCount"> (197)</span></button>
+            <button class="queue-toggle" id="queueToggle" onclick="toggleQueueDrawer()">QUEUE<span class="q-badge" id="qBadge">0</span></button>
+            <span class="stats" id="stats">306 images (197 removed)</span>
+        </div>
+    </div>
+    <div class="section-row" id="tabs"></div>
+</div>
+
+<div class="content" id="content"></div>
+
+<div class="lightbox" id="lightbox">
+    <span class="close" onclick="closeLightbox()">×</span>
+    <div class="lb-image-area">
+        <span class="nav prev" onclick="navLightbox(-1)">‹</span>
+        <span class="nav next" onclick="navLightbox(1)">›</span>
+        <img id="lbImg" src="" alt="" style="transform: scale(1);">
+    </div>
+    <div class="lb-toolbar">
+        <div class="lb-toolbar-left">
+            <button class="lb-btn lb-btn-remove" onclick="deleteCurrent()">Remove</button>
+        </div>
+        <div class="lb-toolbar-center">
+            <button class="lb-btn lb-btn-find" onclick="openFindSimilar()">Find Similar</button>
+            <button class="lb-btn lb-btn-generate" onclick="openGenerateSimilar()">Generate Similar</button>
+            <div class="lb-zoom" style="margin-left:12px;">
+                <button class="lb-zoom-btn" onclick="zoomImage(-1)">−</button>
+                <span class="lb-zoom-level" id="zoomLevel">100%</span>
+                <button class="lb-zoom-btn" onclick="zoomImage(1)">+</button>
+                <button class="lb-zoom-btn" onclick="zoomImage(0)" title="Reset" style="font-size:0.75em;margin-left:2px;">FIT</button>
+            </div>
+        </div>
+        <div class="lb-toolbar-right">
+            <div class="info" id="lbInfo">4 / 30</div>
+        </div>
+    </div>
+</div>
+
+<!-- Find Similar Modal -->
+<div class="fs-overlay" id="fsOverlay">
+    <div class="fs-modal">
+        <div class="fs-modal-header">
+            <h3>FIND SIMILAR IMAGES</h3>
+            <div class="fs-subtitle">Add a search request to the queue</div>
+        </div>
+        <div class="fs-modal-thumb" id="fsThumb">
+            <img id="fsThumbImg" src="" alt="">
+            <div class="fs-source">
+                <strong id="fsThumbSection">—</strong><br>
+                <span id="fsThumbIndex">Image 1 of 15</span>
+            </div>
+        </div>
+        <div class="fs-modal-body">
+            <div class="fs-field">
+                <label>How many similar images?</label>
+                <div class="fs-count-row">
+                    <input type="range" id="fsCount" min="1" max="30" value="5" oninput="document.getElementById('fsCountVal').textContent=this.value">
+                    <span class="fs-count-val" id="fsCountVal">5</span>
+                </div>
+            </div>
+            <div class="fs-field">
+                <label>Source preference</label>
+                <div class="fs-radio-group">
+                    <div class="fs-radio selected" data-value="same" onclick="selectFsRadio(this)">
+                        <div class="fs-radio-title">Same photographer</div>
+                        <div class="fs-radio-desc">More work from the same artist</div>
+                    </div>
+                    <div class="fs-radio" data-value="new" onclick="selectFsRadio(this)">
+                        <div class="fs-radio-title">New photographer</div>
+                        <div class="fs-radio-desc">Discover new artists with a similar style</div>
+                    </div>
+                    <div class="fs-radio" data-value="any" onclick="selectFsRadio(this)">
+                        <div class="fs-radio-title">Any</div>
+                        <div class="fs-radio-desc">Best match regardless of source</div>
+                    </div>
+                </div>
+            </div>
+            <div class="fs-field">
+                <label>Notes (optional)</label>
+                <textarea class="fs-note" id="fsNote" placeholder="e.g. 'more closeups like this' or 'similar lighting but outdoor'"></textarea>
+            </div>
+        </div>
+        <div class="fs-modal-footer">
+            <button class="fs-btn fs-btn-cancel" onclick="closeFindSimilar()">Cancel</button>
+            <button class="fs-btn fs-btn-submit" onclick="submitFindSimilar()">Add to Queue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Queue Drawer -->
+<div class="queue-drawer" id="queueDrawer">
+    <div class="queue-drawer-header">
+        <h3>SEARCH QUEUE</h3>
+        <button class="queue-drawer-close" onclick="toggleQueueDrawer()">×</button>
+    </div>
+    <div class="queue-list" id="queueList">
+        <div class="queue-empty">No requests yet. Open an image and click<br>"Find Similar" to add one.</div>
+    </div>
+    <div class="queue-drawer-footer">
+        <button class="fs-btn fs-btn-cancel" onclick="clearQueue()">Clear all</button>
+        <button class="fs-btn fs-btn-submit" onclick="exportQueue()">Export Queue</button>
+    </div>
+</div>
+
+<!-- Generate Similar Modal -->
+<div class="gs-overlay" id="gsOverlay">
+    <div class="gs-modal">
+        <div class="gs-modal-header">
+            <h3>GENERATE SIMILAR IMAGE</h3>
+            <div class="gs-subtitle">Create AI-generated images inspired by this reference</div>
+        </div>
+        <div class="gs-modal-thumb" id="gsThumb">
+            <img id="gsThumbImg" src="" alt="">
+            <div class="gs-source">
+                <strong id="gsThumbSection">—</strong><br>
+                <span id="gsThumbIndex">Reference image</span>
+            </div>
+        </div>
+        <div class="gs-modal-body">
+            <div class="gs-field">
+                <label>Image type</label>
+                <div class="gs-type-grid">
+                    <div class="gs-type-card selected" data-value="similar" onclick="selectGsType(this)">
+                        <span class="gs-type-icon">□</span>
+                        <div class="gs-type-title">Similar only</div>
+                        <div class="gs-type-desc">Reproduce the same visual style, mood, and composition</div>
+                    </div>
+                    <div class="gs-type-card" data-value="ambient" onclick="selectGsType(this)">
+                        <span class="gs-type-icon">◎</span>
+                        <div class="gs-type-title">Ambient</div>
+                        <div class="gs-type-desc">Environment, atmosphere, and spatial mood</div>
+                    </div>
+                    <div class="gs-type-card" data-value="lifestyle" onclick="selectGsType(this)">
+                        <span class="gs-type-icon">♢</span>
+                        <div class="gs-type-title">Lifestyle</div>
+                        <div class="gs-type-desc">Human presence, gesture, and everyday moments</div>
+                    </div>
+                    <div class="gs-type-card" data-value="fragrance" onclick="selectGsType(this)">
+                        <span class="gs-type-icon">✿</span>
+                        <div class="gs-type-title">With fragrance</div>
+                        <div class="gs-type-desc">Feature a specific BELNU fragrance in the scene</div>
+                    </div>
+                </div>
+            </div>
+            <div class="gs-field" id="gsFragField" style="display:none;">
+                <label>Select fragrance</label>
+                <div class="gs-fragrance-row visible">
+                    <button class="gs-frag-chip selected" data-frag="Rose Steady" onclick="selectFrag(this)">Rose Steady</button>
+                    <button class="gs-frag-chip" data-frag="Chai Fleur" onclick="selectFrag(this)">Chai Fleur</button>
+                    <button class="gs-frag-chip" data-frag="Bergamot Brio" onclick="selectFrag(this)">Bergamot Brio</button>
+                    <button class="gs-frag-chip" data-frag="Incense Antique" onclick="selectFrag(this)">Incense Antique</button>
+                </div>
+            </div>
+            <div class="gs-field">
+                <label>How many to generate?</label>
+                <div class="gs-count-row">
+                    <input type="range" id="gsCount" min="1" max="12" value="3" oninput="document.getElementById('gsCountVal').textContent=this.value">
+                    <span class="gs-count-val" id="gsCountVal">3</span>
+                </div>
+            </div>
+            <div class="gs-field">
+                <label>Creative direction (optional)</label>
+                <textarea class="gs-note" id="gsNote" placeholder="e.g. 'warmer tones' or 'add morning light through a window'"></textarea>
+            </div>
+        </div>
+        <div class="gs-modal-footer">
+            <button class="gs-btn gs-btn-cancel" onclick="closeGenerateSimilar()">Cancel</button>
+            <button class="gs-btn gs-btn-submit" onclick="submitGenerateSimilar()">Add to Queue</button>
+        </div>
+    </div>
+</div>
+
+<div class="action-bar" id="actionBar">
+    <div class="selection-info"><strong id="selCount">1</strong> images selected for removal</div>
+    <div class="actions">
+        <button class="action-btn btn-select-all" onclick="selectAllVisible()">Select all in view</button>
+        <button class="action-btn btn-cancel" onclick="clearSelection()">Clear</button>
+        <button class="action-btn btn-delete" onclick="deleteSelected()">Remove selected</button>
+    </div>
+</div>
+
+<div class="undo-toast" id="undoToast">
+    <span id="undoMsg">Removed 1 image</span>
+    <button class="undo-btn" onclick="undoDelete()">UNDO</button>
+</div>
+
+<script>const photographerData = {
+    "Jack Davison": [
+        "https://images.prismic.io/jackdavison/1f1c2c88-dd3d-4ba7-af1a-cc4af723114a_DSC05086+copy.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/28c97edf7782a7e61a36fd2b87686543f51c8773_lorde---jack-davison.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/791d0d8caf3c2aa04081d75e1ea71da4f49f9425_jack_vogue_20072017_16_1.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/3b15afe35f023671af8926f27d054f485ca05e6a_jd069914sm.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/aceb98b709a3ad81c90bd8978f2fc92d9f5946ac_luncheon-dior-scans016_1.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/14d5446db84f7c1bfcbda50b9a3945f770c02574_work-5.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/4babf6f4961fd09024aba3f4ae66ac082fe39a15_jd043398_1.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/47e23e357c5a882bf3d7ab2f72efdbde6af8d151_dsc_0237_1.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/33f3a65d9711a91ecdffcc6cfc8d775c77963fc6_jd042100_1.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/3bc7da4c66840fc906d0f60e73f32caae1738dd6_ja001429-copy.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/aNFEtJ5xUNkB0-L6_JackD_110325_011copy.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/aNFEqJ5xUNkB0-Ls_DSCF4661copy.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/332b810e-d2c8-426c-8398-3ae5bcac4913_JD103079+copy.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/425484da-9ba6-46d0-bb38-c3ec8bf3d508_jackD291119_+017.jpg?auto=format,compress",
+        "https://images.prismic.io/jackdavison/75078ade-b0ff-4a8f-969d-901515944a55_DSCF1900+copy.jpg?auto=format,compress"
+    ],
+    "Charlotte Lapalus": [
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728762021962-EWTOMOVAHBXVZP16URWH/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+21.39.23.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728762010443-4W64B36OUBVC4Z4PIQB8/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+21.36.49.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728762044187-DMER4D4F3CURMYJWQGR3/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+21.37.16.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728762221055-997ZPAQ5H6CUEF3J18Z6/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+21.42.59.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728756127377-1T5T3AI8L24D2IDUQWIV/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+19.54.29.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728760887468-G21V7RF9QT85TCQG3OZC/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+21.00.57.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1613410822376-L837BVTFRXDPPX141I4Z/643B3E57-B689-4DFE-93DE-A27C438C7442.jpeg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728844036546-1XF976NMKXFAP6W45ZTH/Capture+d%E2%80%99%C3%A9cran+2024-10-13+%C3%A0+20.21.20.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1578997060136-9O9BEYUC65GP9OOY5OW9/_44A7649.jpg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1578996735471-90K19F4ZHSIV90KVNKC6/IMGP0830.jpg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1583425315375-IFJ8809EKMR3H33RY3EH/IMGP6517-Modifier.jpg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728763709075-JNWXGT122DAW2WO8HAF5/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+22.00.59.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1578996357819-N2FD4VMXCO811W4F89SA/_44A5416.jpg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728763694787-63C5A3T3EVUHJ03K2C55/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+22.00.11.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1578998496094-1IHSVG0DQGFWAZ76SML8/AA4A6461.jpg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728762009620-SK7FZ1AHKOSWS2XN2MY2/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+21.36.08.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728763714543-REC1O9DUBP6Q09I99ALU/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+22.02.00.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728844033239-Z8WW26FKABKCZ4KSW086/Capture+d%E2%80%99%C3%A9cran+2024-10-13+%C3%A0+20.23.05.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728763687002-T88QYQO750H3FIUW8NOV/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+22.04.32.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728768904993-6T8MVNGMMM19VH560BGX/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+23.30.05.png?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1613408901068-1RIBGM9WB8IJAOIJITAA/D12691D1-3B14-442C-A81E-5E0542CE7DCA.jpeg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1613413935563-52ABKI6Y6FNT460IT8DO/E05EA8F9-2018-4634-AEE2-DFE63F86662B.jpeg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1613411938709-C12VROZPMJN58YINPEIO/19A4C5FF-90C4-4CEC-82B0-F1B1F4CE0248.jpeg?format=1500w",
+        "https://images.squarespace-cdn.com/content/v1/57160849c2ea51227fc10bec/1728762536233-4D9FBB6F9BWX1M1WX2SO/Capture+d%E2%80%99%C3%A9cran+2024-10-12+%C3%A0+21.45.40.png?format=1500w"
+    ],
+    "Luke Lovell": [
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1750434418658-ZQ4OJ3HFH8FCAYCEG5AK/Ugnes_Story0+670+copy.jpg?format=2500w",
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1750434416587-21EPFWPZ6NXTXEJS543P/Ugnes_Story0+540+copy.jpg?format=2500w",
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1750435241660-5QFAVJCZ253GKVKC80XL/Ugnes_Story0+602.jpg?format=2500w",
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1757452009452-LH86MJHUF8BFF7EGIEEC/Kinfolk_Ottessa16399.jpg?format=2500w",
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1757452012452-9LVBGJO6VH0BW4GS5BAZ/Kinfolk_Ottessa16400.jpg?format=2500w",
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1750439712142-NCHKISSJU7X8P9SMBVVW/Portfolio+2.0.086.jpeg?format=2500w",
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1750438877790-KAF869KS71DUQ86QZVTU/_PEN1176+copy.jpg?format=2500w",
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1750437698813-CR1FFE5W7ODKNGDRN3AH/Portfolio+2.0.044.jpeg?format=2500w",
+        "https://images.squarespace-cdn.com/content/v1/5e0e68186c335360f9ce49ee/1750438877649-9J8QNMT75CUN6C01XV1X/_PEN1098+copy.jpg?format=2500w"
+    ],
+    "Robbie Lawrence": [
+        "https://robbie-lawrence.com/wp-content/uploads/2018/12/1-copy-700x472.jpg",
+        "https://robbie-lawrence.com/wp-content/uploads/2020/08/7B9A4131-525x700.jpg",
+        "https://robbie-lawrence.com/wp-content/uploads/2020/08/7B9A5219-700x525.jpg",
+        "https://robbie-lawrence.com/wp-content/uploads/2018/12/51A7906-525x700.jpg",
+        "https://robbie-lawrence.com/wp-content/uploads/2022/11/51A4334-525x700.jpg",
+        "https://robbie-lawrence.com/wp-content/uploads/2018/12/51A5951-525x700.jpg",
+        "https://robbie-lawrence.com/wp-content/uploads/2022/04/51A2563_CMS.jpg-350x467.jpg"
+    ],
+    "Geordie Wood": [
+        "https://geordie-wood.imgix.net/David_Yurman_Fall_Shot_03_139_V3-zmq8.JPG?w=900",
+        "https://geordie-wood.imgix.net/GW20170250291-4hep.JPG?w=900",
+        "https://geordie-wood.imgix.net/GW202001708_V3-z7oy.JPG?w=1700",
+        "https://geordie-wood.imgix.net/Uniqlo_Airism_Scent_036-5adw.JPG?w=800"
+    ],
+    "Laurence Ellis": [
+        "https://www.laurenceellis.com/wp-content/uploads/2017/03/LW-_W-MAG-5_Fin-3-785x1000.jpg",
+        "https://www.laurenceellis.com/wp-content/uploads/2016/09/151211_Adidas_Originals_Capture_665-CROP-3-778x1000.jpg"
+    ],
+    "Linda Brownlee": [
+        "https://admin.lindabrownlee.com/app/uploads/2024/06/DSCF9642-800x1000.jpg"
+    ]
+};
+
+const categoryData = {
+    "01_Lighting": [
+        "https://i.pinimg.com/736x/11/a5/dd/11a5ddeba948d737bc7afb0acb284ca4.jpg",
+        "https://i.pinimg.com/736x/1f/04/d6/1f04d67716d95882c809dd68d2f5f7de.jpg",
+        "https://i.pinimg.com/736x/20/f0/26/20f0261123440aba6ea2e479d1b1b2a0.jpg",
+        "https://i.pinimg.com/736x/25/72/bc/2572bcc2eb631a5090132d4f6f624abf.jpg",
+        "https://i.pinimg.com/736x/2d/64/fe/2d64fe54b9da33ae0f16d4844b08842f.jpg",
+        "https://i.pinimg.com/736x/2e/79/67/2e7967b0ed8d8ee8675f0ade9bc4a7c8.jpg",
+        "https://i.pinimg.com/736x/46/78/24/46782472d375665983e6eca73ed8f957.jpg",
+        "https://i.pinimg.com/736x/48/d0/b3/48d0b35b13fcac16a1c58128b13edca8.jpg",
+        "https://i.pinimg.com/736x/50/6a/7a/506a7ab950044f40b1053d63fd94b425.jpg",
+        "https://i.pinimg.com/736x/53/22/d4/5322d421ea4a7c0d40c659065b34c57b.jpg",
+        "https://i.pinimg.com/736x/56/04/02/560402fd623bbd52e52014658141b5e4.jpg",
+        "https://i.pinimg.com/736x/5a/ca/9a/5aca9a5df85206d841a9db2eb675997b.jpg",
+        "https://i.pinimg.com/736x/5c/a0/d7/5ca0d7c978710b0fe03034b4b5bfcbf0.jpg",
+        "https://i.pinimg.com/736x/66/63/20/6663207b90884a28d0e6e1dcb1b23c1a.jpg",
+        "https://i.pinimg.com/736x/6c/60/b3/6c60b398e5ad7df47146aa0c47ef5db2.jpg",
+        "https://i.pinimg.com/736x/78/95/e9/7895e9276273bb8c6948c76d47ad4d4d.jpg",
+        "https://i.pinimg.com/736x/7c/0b/83/7c0b8338b59f94e797a91c32aecb1171.jpg",
+        "https://i.pinimg.com/736x/8d/40/6b/8d406b047e592440073440489d8bc517.jpg",
+        "https://i.pinimg.com/736x/8e/4b/c0/8e4bc09bbd8ec890c1e010ca5a123e40.jpg",
+        "https://i.pinimg.com/736x/9d/ef/d2/9defd24dfa50dfe8f586f680acf0cfa4.jpg",
+        "https://i.pinimg.com/736x/b3/28/5c/b3285c8c3bdb092358261a502cdce662.jpg",
+        "https://i.pinimg.com/736x/d4/8b/3a/d48b3a5641393fb826b8a1ebbce16f9a.jpg",
+        "https://i.pinimg.com/736x/e0/8b/8e/e08b8ead358cc931338b6829301a1c3a.jpg"
+    ],
+    "02_Composition": [
+        "https://i.pinimg.com/736x/03/88/e0/0388e0328a08334dd55c9eb7f2f92544.jpg",
+        "https://i.pinimg.com/736x/19/29/19/192919bd2af55f9c6a42593461bf1a23.jpg",
+        "https://i.pinimg.com/736x/1c/7d/52/1c7d52cd0c2ca6904c9b08fc59c72037.jpg",
+        "https://i.pinimg.com/736x/1f/53/0b/1f530bea927f086eb89ee6566686afee.jpg",
+        "https://i.pinimg.com/736x/33/f3/cd/33f3cd3e8722fb65a517e4e545c140e9.jpg",
+        "https://i.pinimg.com/736x/3a/f3/4e/3af34e528f8520a32417be55e20fb532.jpg",
+        "https://i.pinimg.com/736x/3f/4a/d8/3f4ad8017dda8cd2fc1d044010a9ee2e.jpg",
+        "https://i.pinimg.com/736x/44/24/66/4424669a34633cd597b4666c3dfa9352.jpg",
+        "https://i.pinimg.com/736x/44/36/ac/4436acd008d9ce538013b64c95509c19.jpg",
+        "https://i.pinimg.com/736x/47/d8/fd/47d8fdfb4d5dfb8b788d2299dce4c9d5.jpg",
+        "https://i.pinimg.com/736x/47/e5/1a/47e51a89ab1253b9b92cc213e0fe714c.jpg",
+        "https://i.pinimg.com/736x/4b/cf/f0/4bcff08b017c695ebbf924c600b11839.jpg",
+        "https://i.pinimg.com/736x/4d/3f/72/4d3f72fe7d676c66c96c7199650a2e81.jpg",
+        "https://i.pinimg.com/736x/4d/58/00/4d580077b68615bf89ca7fc8ca23a94a.jpg",
+        "https://i.pinimg.com/736x/4d/d2/33/4dd23386a95943599332d2dc4a276c84.jpg",
+        "https://i.pinimg.com/736x/55/62/45/556245bf0c7b8fc2f56ecc8196043409.jpg",
+        "https://i.pinimg.com/736x/59/9a/29/599a293837d667a98887f4440c72b7f7.jpg",
+        "https://i.pinimg.com/736x/61/75/e1/6175e15191e5c3d49833c47ea0a29dae.jpg",
+        "https://i.pinimg.com/736x/67/f1/80/67f18068af1dc279248a8012bde44521.jpg",
+        "https://i.pinimg.com/736x/6e/6c/76/6e6c76974ae5c56722e5d7863f75bc49.jpg",
+        "https://i.pinimg.com/736x/6f/ce/e9/6fcee94a566a4f573852781bc1f975a4.jpg",
+        "https://i.pinimg.com/736x/7a/de/37/7ade370b7c29a276488885981930f216.jpg",
+        "https://i.pinimg.com/736x/86/0a/05/860a0512adbe9c1c6ca04d83ba81a82a.jpg",
+        "https://i.pinimg.com/736x/86/f9/fa/86f9fa897543b85bd7a44ae5b62d0e64.jpg",
+        "https://i.pinimg.com/736x/a1/40/21/a1402185aaa90d2782063443d1083f92.jpg",
+        "https://i.pinimg.com/736x/a9/10/a7/a910a796d3d7d943f6fe1c02471ae7d0.jpg",
+        "https://i.pinimg.com/736x/b3/09/fd/b309fdc547d94afd1d3d1b2e7377eca3.jpg",
+        "https://i.pinimg.com/736x/b8/3a/49/b83a4972822ee882d20066e905b12f2d.jpg",
+        "https://i.pinimg.com/736x/bd/f1/fb/bdf1fba85b06b5dcbe9e8b433a3f54e0.jpg",
+        "https://i.pinimg.com/736x/c0/b0/9b/c0b09b70d4b330c5f0b2f93aba36dfec.jpg",
+        "https://i.pinimg.com/736x/c9/2a/78/c92a7820c3c6e2a68cb4a5acf34943a1.jpg",
+        "https://i.pinimg.com/736x/d3/29/c3/d329c3f3e120870d69960635fa23d1f7.jpg",
+        "https://i.pinimg.com/736x/d8/74/9b/d8749b14b98bd05b28393a08dd65dfae.jpg",
+        "https://i.pinimg.com/736x/e1/a3/b9/e1a3b9e71581bac0e0334c9b0f45cbea.jpg",
+        "https://i.pinimg.com/736x/e6/1c/5a/e61c5aed9971599c961c1db5cc92d2a1.jpg",
+        "https://i.pinimg.com/736x/ea/c6/96/eac696e7eaebd0025b365cf397fd71d9.jpg",
+        "https://i.pinimg.com/736x/f2/ec/de/f2ecde62d1b072a062a5cee69f096e34.jpg",
+        "https://i.pinimg.com/736x/f3/5d/39/f35d39fccbff544e007390856d71ed81.jpg",
+        "https://i.pinimg.com/736x/fc/3b/33/fc3b33d39f31864d0ddb3daf41035315.jpg",
+        "https://i.pinimg.com/736x/fe/94/e7/fe94e78db0069069df9205b33b1e3dd9.jpg",
+        "https://i.pinimg.com/736x/ff/89/88/ff8988cd97ca29937d141a13c8edd167.jpg"
+    ],
+    "03_Material_Texture": [
+        "https://i.pinimg.com/736x/4b/7c/4f/4b7c4f6af867ff2a940b8dfbed57707d.jpg",
+        "https://i.pinimg.com/736x/66/8d/7d/668d7d70426f3f0bb30db5ba698881ee.jpg",
+        "https://i.pinimg.com/736x/7d/1d/5e/7d1d5e6de8d704c563ae42d2e044ce79.jpg",
+        "https://i.pinimg.com/736x/80/ee/e1/80eee105a92a1518fcbba477521bf9f0.jpg",
+        "https://i.pinimg.com/736x/b3/87/37/b38737d6ed21d2ff60a8b3964d48acd3.jpg",
+        "https://i.pinimg.com/736x/c1/03/b3/c103b3eb87433db8aebbcbf62d092267.jpg",
+        "https://i.pinimg.com/736x/ca/63/6a/ca636ae98116688a2d34f1153308abd4.jpg",
+        "https://i.pinimg.com/736x/d1/98/88/d19888eba9cc3095eb50fcf7fd56725e.jpg",
+        "https://i.pinimg.com/736x/e7/c7/a2/e7c7a27c1b50f5bce1db74ad9ecd5c5c.jpg"
+    ],
+    "04_Color_Tonality": [
+        "https://i.pinimg.com/736x/fb/f5/91/fbf591bf09dff93e3496d6a9e7a73d17.jpg",
+        "https://i.pinimg.com/736x/28/fe/bf/28febfe9d9a0a616208a3ac0d410ab06.jpg",
+        "https://i.pinimg.com/736x/b2/7c/fc/b27cfc3b5e41e9b3f34ff2314fe010d9.jpg",
+        "https://i.pinimg.com/736x/1b/f8/59/1bf859c14f261ae9e113c801690831e1.jpg",
+        "https://i.pinimg.com/736x/31/29/4d/31294d945673952234d421cfeece59aa.jpg",
+        "https://i.pinimg.com/736x/60/24/48/60244856759861052c99d747b3834405.jpg",
+        "https://i.pinimg.com/736x/ba/6a/5a/ba6a5a9bc7a1e402c8ba2e30aa33cd62.jpg",
+        "https://i.pinimg.com/736x/31/23/51/31235110c9d5b3c394384f3b1c9a9f14.jpg",
+        "https://i.pinimg.com/736x/a1/64/78/a164785cedac96980e472686872a5108.jpg",
+        "https://i.pinimg.com/736x/f2/ec/de/f2ecde62d1b072a062a5cee69f096e34.jpg",
+        "https://i.pinimg.com/736x/4a/ef/3f/4aef3f7e194ff3a3be3aa4c0d732a7cb.jpg"
+    ],
+    "05_Mood_Atmosphere": [
+        "https://i.pinimg.com/736x/8d/d4/0d/8dd40d5c1e6b3e39df0d4c9ee3a1b2f7.jpg",
+        "https://i.pinimg.com/736x/23/7e/b7/237eb7a1c4d5e8f2b6a9c0d3e4f5a6b8.jpg",
+        "https://i.pinimg.com/736x/63/a5/07/63a507dd37fb2ff28b1e379d5d0fc529.jpg",
+        "https://i.pinimg.com/736x/46/d7/70/46d7705570b3c23562a70f39817b7b19.png",
+        "https://i.pinimg.com/736x/6b/8c/a2/6b8ca259afc0d5073408dfbb449c1d05.jpg",
+        "https://i.pinimg.com/736x/93/1a/ec/931aecd0047c3f4ee571f68878e9fcec.jpg",
+        "https://i.pinimg.com/736x/9d/dd/2d/9ddd2d1abb562e6030b38bb72e96fbb4.jpg",
+        "https://i.pinimg.com/736x/93/f6/f6/93f6f6b976a6561e00e9b08523d7b11d.jpg",
+        "https://i.pinimg.com/736x/54/f0/9f/54f09f6ba322f66515b16a6c5a30addf.jpg",
+        "https://i.pinimg.com/736x/b3/28/5c/b3285c8c3bdb092358261a502cdce662.jpg",
+        "https://i.pinimg.com/736x/31/29/4d/31294d945673952234d421cfeece59aa.jpg",
+        "https://i.pinimg.com/736x/31/23/51/31235110c9d5b3c394384f3b1c9a9f14.jpg"
+    ],
+    "06_Product_Still_Life": [
+        "https://i.pinimg.com/736x/4b/31/6a/4b316a2c8f9d0e1a3b5c7d8e9f0a1b2c.jpg",
+        "https://i.pinimg.com/736x/4b/5c/bd/4b5cbd3e6f8a1c2d4e5f6a7b8c9d0e1f.jpg",
+        "https://i.pinimg.com/736x/7e/95/c7/7e95c7d8e9f0a1b2c3d4e5f6a7b8c9d0.jpg",
+        "https://i.pinimg.com/736x/85/3a/1c/853a1c0f86dec43056562ba64a679a76.jpg",
+        "https://i.pinimg.com/736x/8b/b1/0d/8bb10d1e2f3a4b5c6d7e8f9a0b1c2d3e.jpg",
+        "https://i.pinimg.com/736x/c9/c7/80/c9c780a1b2c3d4e5f6a7b8c9d0e1f2a3.jpg",
+        "https://i.pinimg.com/736x/ca/e5/a3/cae5a3b4c5d6e7f8a9b0c1d2e3f4a5b6.jpg",
+        "https://i.pinimg.com/736x/ca/fa/c6/cafac64691c74407944b67d34b2783d0.jpg",
+        "https://i.pinimg.com/736x/aa/a4/63/aaa4631b2d42680193280c488dcebc4a.jpg",
+        "https://i.pinimg.com/736x/45/4f/a6/454fa64f1e627cd29f792759e06fbdc7.jpg",
+        "https://i.pinimg.com/736x/2b/3a/87/2b3a874002ae15a404a30e96bf8bb73e.jpg",
+        "https://i.pinimg.com/736x/2f/bf/aa/2fbfaad760c1ca5ef11fa460e0a48141.jpg",
+        "https://i.pinimg.com/736x/55/a1/88/55a18845330e89c0ac32f798994c15a6.jpg",
+        "https://i.pinimg.com/736x/e4/be/b5/e4beb54b1cf82a9774ceaaadb79da143.jpg",
+        "https://i.pinimg.com/736x/57/59/12/5759121423ab84382f6997c81b5ecf0b.jpg",
+        "https://i.pinimg.com/736x/75/e7/b6/75e7b6a5cbd7b4f349a0406853ef386e.jpg",
+        "https://i.pinimg.com/736x/70/e2/17/70e217feb6fac1541a3ad6df49f9de8b.jpg",
+        "https://i.pinimg.com/736x/74/7d/bc/747dbc9b4f842d3fc64149959a708b45.jpg",
+        "https://i.pinimg.com/736x/ae/51/e4/ae51e47dcda820cb3163ddea237a1bc3.jpg",
+        "https://i.pinimg.com/736x/35/f6/2a/35f62aea48cd982dd91958bfcdb717cf.jpg",
+        "https://i.pinimg.com/736x/e6/3a/d5/e63ad5687e47a1ffbccfb63a3faa4f09.jpg",
+        "https://i.pinimg.com/736x/17/c1/08/17c108d1050316766b97f1e6093f7404.jpg",
+        "https://i.pinimg.com/736x/52/b4/5c/52b45c0414e928844bf8f3c696ab730a.jpg",
+        "https://i.pinimg.com/736x/db/49/23/db49234010e6f4d46a1d3aada9cd13bd.jpg",
+        "https://i.pinimg.com/736x/7b/51/86/7b5186648dcf9532eff1f0615e5a38e6.jpg",
+        "https://i.pinimg.com/736x/b3/28/5c/b3285c8c3bdb092358261a502cdce662.jpg"
+    ],
+    "07_Casting_Gesture": [
+        "https://i.pinimg.com/736x/f3/70/b0/f370b0a1b2c3d4e5f6a7b8c9d0e1f2a3.jpg",
+        "https://i.pinimg.com/736x/8e/53/96/8e5396a1b2c3d4e5f6a7b8c9d0e1f2a3.jpg",
+        "https://i.pinimg.com/736x/4e/dc/ed/4edceda1b2c3d4e5f6a7b8c9d0e1f2a3.jpg",
+        "https://i.pinimg.com/736x/d6/92/04/d69204bb1491576e98cb5b4144f29b7a.jpg",
+        "https://i.pinimg.com/736x/4e/97/b8/4e97b8dfa35cc44bc330b71f7e276096.jpg",
+        "https://i.pinimg.com/736x/02/3b/31/023b3187e3d73408fabc04a0d33d144b.jpg",
+        "https://i.pinimg.com/736x/ac/db/0f/acdb0fb2f3b6f50a2c45f3ae81054740.jpg",
+        "https://i.pinimg.com/736x/2d/c0/6c/2dc06c2e3943519630d1f4c4b9a22202.jpg",
+        "https://i.pinimg.com/736x/4f/6a/87/4f6a87c40ed66f0855e8487d6acd341f.jpg",
+        "https://i.pinimg.com/736x/fa/27/8d/fa278d99f9e29a3fccb90ab1961f613f.jpg",
+        "https://i.pinimg.com/736x/4d/41/45/4d41453e7eb0dae310a5c4caaa31e9bf.jpg",
+        "https://i.pinimg.com/736x/65/a5/f7/65a5f72b539a2cb58a7ff0ef09e3ed62.jpg",
+        "https://i.pinimg.com/736x/86/03/9d/86039d3bbbb483fa06fa70955ae1149c.jpg",
+        "https://i.pinimg.com/736x/42/59/9a/42599a334add3dc46996d9b2b43410d2.jpg",
+        "https://i.pinimg.com/736x/8c/39/7e/8c397e62bce4a1b2c3d4e5f6a7b8c9d0.jpg",
+        "https://i.pinimg.com/736x/b3/28/5c/b3285c8c3bdb092358261a502cdce662.jpg"
+    ],
+    "08_Environment": [
+        "https://i.pinimg.com/736x/6f/ce/e9/6fcee94a566a4f573852781bc1f975a4.jpg",
+        "https://i.pinimg.com/736x/b9/14/7f/b9147f3a4b5c6d7e8f9a0b1c2d3e4f5a.jpg",
+        "https://i.pinimg.com/736x/5d/b8/f9/5db8f9a1b2c3d4e5f6a7b8c9d0e1f2a3.jpg",
+        "https://i.pinimg.com/736x/89/37/37/893737a1b2c3d4e5f6a7b8c9d0e1f2a3.jpg",
+        "https://i.pinimg.com/736x/50/6a/7a/506a7ab950044f40b1053d63fd94b425.jpg",
+        "https://i.pinimg.com/736x/24/3f/65/243f65edfab3a0ad8797ee32153dbc79.jpg",
+        "https://i.pinimg.com/736x/b1/aa/1d/b1aa1d60b25ce14dc3f935e5cdd9b78f.jpg",
+        "https://i.pinimg.com/736x/eb/ec/a2/ebeca29bbcc7bedb5f09eb845345a63c.jpg",
+        "https://i.pinimg.com/736x/0e/8d/06/0e8d062eb9a5a8aa98303b50bc670a6b.jpg",
+        "https://i.pinimg.com/736x/89/e4/a1/89e4a1689f55e69321bc8e3f4a813729.jpg",
+        "https://i.pinimg.com/736x/e8/e3/cc/e8e3cc3bcd2be0dc848d427c74411951.jpg",
+        "https://i.pinimg.com/736x/4a/9f/75/4a9f75682165e905dba1b1a28465718e.jpg",
+        "https://i.pinimg.com/736x/8b/6f/d0/8b6fd01d6bfeaa6fc038469012447382.jpg",
+        "https://i.pinimg.com/736x/d1/42/46/d14246319bfa1b2c3d4e5f6a7b8c9d0e.jpg",
+        "https://i.pinimg.com/736x/4a/ef/3f/4aef3f7e194ff3a3be3aa4c0d732a7cb.jpg",
+        "https://i.pinimg.com/736x/b3/28/5c/b3285c8c3bdb092358261a502cdce662.jpg",
+        "https://i.pinimg.com/736x/31/23/51/31235110c9d5b3c394384f3b1c9a9f14.jpg",
+        "https://i.pinimg.com/736x/a1/64/78/a164785cedac96980e472686872a5108.jpg"
+    ]
+};
+
+const selectReferenceUrls = new Set([
+    "https://images.prismic.io/jackdavison/14d5446db84f7c1bfcbda50b9a3945f770c02574_work-5.jpg?auto=format,compress"
+]);
+
+// Reference/seed images that triggered find-similar searches
+const allData = {};
+const photographerKeys = Object.keys(photographerData);
+const categoryKeys = Object.keys(categoryData);
+const similarFindsKeys = Object.keys(similarFindsData);
+const researchBoardsKeys = Object.keys(researchBoardsData);
+
+for (const [k, v] of Object.entries(photographerData)) allData[k] = v;
+for (const [k, v] of Object.entries(categoryData)) allData[k] = v;
+for (const [k, v] of Object.entries(similarFindsData)) allData[k] = v;
+for (const [k, v] of Object.entries(researchBoardsData)) allData[k] = v;
+
+let currentTab = "all";
+let currentUrls = [];
+let lbIndex = 0;
+let gridSize = "medium";
+let deleteMode = false;
+let selectedUrls = new Set();
+let deletedUrls = new Set();
+let undoStack = [];
+let undoTimer = null;
+let similarQueue = [];
+let fsCurrentUrl = null;
+let fsCurrentSection = null;
+
+// Build tabs
+const tabsEl = document.getElementById('tabs');
+
+// "All" tab
+const allTab = document.createElement('div');
+allTab.className = 'tab active';
+allTab.dataset.key = 'all';
+allTab.innerHTML = 'All<span class="count">443</span>';
+allTab.onclick = () => switchTab('all');
+tabsEl.appendChild(allTab);
+
+// Photographer tabs
+photographerKeys.forEach(name => {
+    const t = document.createElement('div');
+    t.className = 'tab photographer';
+    t.dataset.key = name;
+    t.innerHTML = name + '<span class="count">' + photographerData[name].length + '</span>';
+    t.onclick = () => switchTab(name);
+    tabsEl.appendChild(t);
+});
+
+// Divider
+const div = document.createElement('div');
+div.className = 'divider-tab';
+div.textContent = 'References';
+tabsEl.appendChild(div);
+
+// Category tabs
+categoryKeys.forEach(name => {
+    const t = document.createElement('div');
+    t.className = 'tab';
+    t.dataset.key = name;
+    const label = name.replace(/^\d+_/, '').replace(/_/g, ' ');
+    t.innerHTML = label + '<span class="count">' + categoryData[name].length + '</span>';
+    t.onclick = () => switchTab(name);
+    tabsEl.appendChild(t);
+});
+
+// Similar Finds divider + tabs
+if (similarFindsKeys.length > 0) {
+    const div2 = document.createElement('div');
+    div2.className = 'divider-tab';
+    div2.textContent = 'Similar Finds';
+    tabsEl.appendChild(div2);
+
+    similarFindsKeys.forEach(name => {
+        const t = document.createElement('div');
+        t.className = 'tab';
+        t.dataset.key = name;
+        t.style.borderBottomColor = 'transparent';
+        t.innerHTML = name + '<span class="count">' + similarFindsData[name].length + '</span>';
+        t.onclick = () => switchTab(name);
+        tabsEl.appendChild(t);
+    });
+}
+
+// Research Boards divider + tabs
+if (researchBoardsKeys.length > 0) {
+    const div3 = document.createElement('div');
+    div3.className = 'divider-tab';
+    div3.textContent = 'Research Boards';
+    tabsEl.appendChild(div3);
+
+    researchBoardsKeys.forEach(name => {
+        const t = document.createElement('div');
+        t.className = 'tab';
+        t.dataset.key = name;
+        t.innerHTML = name + '<span class="count">' + researchBoardsData[name].length + '</span>';
+        t.onclick = () => switchTab(name);
+        tabsEl.appendChild(t);
+    });
+}
+
+function switchTab(key) {
+    currentTab = key;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const active = document.querySelector(`.tab[data-key="${key}"]`);
+    if (active) active.classList.add('active');
+    renderContent();
+}
+
+function renderContent() {
+    const content = document.getElementById('content');
+    content.innerHTML = '';
+
+    if (currentTab === 'all') {
+        // Show all sections
+        let allUrls = [];
+
+        // Photographers
+        photographerKeys.forEach(name => {
+            const section = createSection(name, photographerData[name], true);
+            content.appendChild(section);
+            allUrls = allUrls.concat(photographerData[name]);
+        });
+
+        // Categories
+        categoryKeys.forEach(name => {
+            const label = name.replace(/^\d+_/, '').replace(/_/g, ' ');
+            const section = createSection(label, categoryData[name], false);
+            content.appendChild(section);
+            allUrls = allUrls.concat(categoryData[name]);
+        });
+
+        // Similar Finds
+        similarFindsKeys.forEach(name => {
+            const section = createSection(name, similarFindsData[name], true);
+            content.appendChild(section);
+            allUrls = allUrls.concat(similarFindsData[name]);
+        });
+
+        // Research Boards
+        researchBoardsKeys.forEach(name => {
+            const section = createSection(name, researchBoardsData[name], true);
+            content.appendChild(section);
+            allUrls = allUrls.concat(researchBoardsData[name]);
+        });
+
+        currentUrls = allUrls.filter(u => !deletedUrls.has(u));
+        const totalAll = 443 + similarFindsKeys.reduce((s, k) => s + similarFindsData[k].length, 0) + researchBoardsKeys.reduce((s, k) => s + researchBoardsData[k].length, 0);
+        const totalRemaining = totalAll - deletedUrls.size;
+        document.getElementById('stats').textContent = totalRemaining + ' images' +
+            (deletedUrls.size > 0 ? ' (' + deletedUrls.size + ' removed)' : '');
+    } else {
+        const urls = allData[currentTab];
+        currentUrls = urls.filter(u => !deletedUrls.has(u));
+        const label = currentTab.replace(/^\d+_/, '').replace(/_/g, ' ');
+        const section = createSection(label, urls, (photographerKeys.includes(currentTab) || researchBoardsKeys.includes(currentTab)));
+        content.appendChild(section);
+        document.getElementById('stats').textContent = currentUrls.length + '/' + urls.length + ' images';
+    }
+}
+
+function createSection(title, urls, isPhotographer) {
+    // Filter out deleted URLs
+    const visibleUrls = urls.filter(u => !deletedUrls.has(u));
+
+    if (visibleUrls.length === 0) return document.createElement('div');
+
+    const wrapper = document.createElement('div');
+    wrapper.style.marginBottom = '48px';
+
+    const h2 = document.createElement('div');
+    h2.className = 'section-title';
+    h2.textContent = title + (isPhotographer ? ' — Portfolio' : '') +
+        (visibleUrls.length < urls.length ? ' (' + visibleUrls.length + '/' + urls.length + ')' : '');
+    wrapper.appendChild(h2);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid' + (gridSize === 'large' ? ' large' : gridSize === 'small' ? ' small' : '');
+
+    visibleUrls.forEach((url, i) => {
+        const card = document.createElement('div');
+        card.className = 'card' + (selectedUrls.has(url) ? ' selected' : '');
+        card.dataset.url = url;
+        card.onclick = (e) => {
+            if (deleteMode) {
+                e.stopPropagation();
+                toggleSelect(url, card);
+            } else {
+                openLightbox(url);
+            }
+        };
+
+        const check = document.createElement('div');
+        check.className = 'select-check';
+        check.innerHTML = '&#10005;';
+
+        const badge = document.createElement('div');
+        badge.className = 'similar-badge';
+        badge.textContent = 'find';
+
+        const genBadge = document.createElement('div');
+        genBadge.className = 'generate-badge';
+        genBadge.textContent = 'generate';
+
+        if (similarQueue.some(r => r.url === url)) card.classList.add('has-request');
+        if (generateQueue.some(r => r.url === url)) card.classList.add('has-generate');
+
+        const img = document.createElement('img');
+        img.loading = 'lazy';
+        img.alt = title + ' ' + (i + 1);
+        img.src = url;
+        img.onerror = function() {
+            this.parentElement.innerHTML = '<div class="loading-placeholder">Failed to load</div>';
+        };
+
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = (i + 1) + ' / ' + visibleUrls.length;
+
+        card.appendChild(check);
+        card.appendChild(genBadge);
+        card.appendChild(badge);
+        card.appendChild(img);
+        card.appendChild(label);
+
+        // SELECT badge for reference/seed images
+        if (selectReferenceUrls.has(url)) {
+            card.classList.add('is-select');
+            const selLabel = document.createElement('div');
+            selLabel.className = 'select-label';
+            selLabel.textContent = 'SELECT';
+            card.appendChild(selLabel);
+        }
+
+        grid.appendChild(card);
+    });
+
+    wrapper.appendChild(grid);
+    return wrapper;
+}
+
+// Lightbox
+function openLightbox(url) {
+    // Use only non-deleted URLs for lightbox navigation
+    const filtered = currentUrls.filter(u => !deletedUrls.has(u));
+    lbIndex = filtered.indexOf(url);
+    if (lbIndex === -1) lbIndex = 0;
+    currentUrls = filtered;
+    showLightboxImage();
+    document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+}
+
+function navLightbox(dir) {
+    lbIndex = (lbIndex + dir + currentUrls.length) % currentUrls.length;
+    showLightboxImage();
+}
+
+function showLightboxImage() {
+    document.getElementById('lbImg').src = currentUrls[lbIndex];
+    document.getElementById('lbInfo').textContent = (lbIndex + 1) + ' / ' + currentUrls.length;
+    resetZoom();
+}
+
+// Delete mode functions
+function toggleDeleteMode() {
+    deleteMode = !deleteMode;
+    document.body.classList.toggle('delete-mode', deleteMode);
+    document.getElementById('deleteToggle').classList.toggle('active', deleteMode);
+    document.getElementById('deleteToggle').textContent = deleteMode ? 'EXIT CURATE' : 'CURATE';
+    if (!deleteMode) {
+        clearSelection();
+        document.getElementById('actionBar').classList.remove('visible');
+    }
+    updateActionBar();
+}
+
+function toggleSelect(url, card) {
+    if (selectedUrls.has(url)) {
+        selectedUrls.delete(url);
+        card.classList.remove('selected');
+    } else {
+        selectedUrls.add(url);
+        card.classList.add('selected');
+    }
+    updateActionBar();
+}
+
+function updateActionBar() {
+    const bar = document.getElementById('actionBar');
+    if (deleteMode && selectedUrls.size > 0) {
+        bar.classList.add('visible');
+        document.getElementById('selCount').textContent = selectedUrls.size;
+    } else {
+        bar.classList.remove('visible');
+    }
+}
+
+function clearSelection() {
+    selectedUrls.clear();
+    document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+    updateActionBar();
+}
+
+function selectAllVisible() {
+    document.querySelectorAll('.card').forEach(c => {
+        const url = c.dataset.url;
+        if (url && !deletedUrls.has(url)) {
+            selectedUrls.add(url);
+            c.classList.add('selected');
+        }
+    });
+    updateActionBar();
+}
+
+function deleteSelected() {
+    if (selectedUrls.size === 0) return;
+    const batch = new Set(selectedUrls);
+    batch.forEach(u => deletedUrls.add(u));
+    undoStack.push(batch);
+    selectedUrls.clear();
+    renderContent();
+    updateActionBar();
+    showUndoToast(batch.size);
+    saveState();
+}
+
+function deleteCurrent() {
+    if (lbIndex < 0 || lbIndex >= currentUrls.length) return;
+    const url = currentUrls[lbIndex];
+    const batch = new Set([url]);
+    deletedUrls.add(url);
+    undoStack.push(batch);
+
+    // Update currentUrls and navigate
+    currentUrls = currentUrls.filter(u => !deletedUrls.has(u));
+    if (currentUrls.length === 0) {
+        closeLightbox();
+    } else {
+        lbIndex = Math.min(lbIndex, currentUrls.length - 1);
+        showLightboxImage();
+    }
+    renderContent();
+    showUndoToast(1);
+    saveState();
+}
+
+function showUndoToast(count) {
+    clearTimeout(undoTimer);
+    const toast = document.getElementById('undoToast');
+    document.getElementById('undoMsg').textContent = 'Removed ' + count + ' image' + (count > 1 ? 's' : '');
+    toast.classList.add('visible');
+    undoTimer = setTimeout(() => toast.classList.remove('visible'), 6000);
+}
+
+function undoDelete() {
+    if (undoStack.length === 0) return;
+    const batch = undoStack.pop();
+    batch.forEach(u => deletedUrls.delete(u));
+    renderContent();
+    document.getElementById('undoToast').classList.remove('visible');
+    clearTimeout(undoTimer);
+    saveState();
+}
+
+function saveState() {
+    try {
+        localStorage.setItem('belnu_review_deleted', JSON.stringify([...deletedUrls]));
+    } catch(e) {}
+    refreshUpdateBtn();
+}
+
+function refreshUpdateBtn() {
+    const btn = document.getElementById('updateCollectBtn');
+    const cnt = document.getElementById('delCount');
+    if (!btn) return;
+    if (deletedUrls.size > 0) {
+        btn.classList.add('has-changes');
+        if (cnt) cnt.textContent = ' (' + deletedUrls.size + ')';
+    } else {
+        btn.classList.remove('has-changes');
+        if (cnt) cnt.textContent = '';
+    }
+}
+
+function exportCurated() {
+    // Build a clean JSON of kept images
+    const kept = { photographers: {}, categories: {} };
+    for (const [name, urls] of Object.entries(photographerData)) {
+        const remaining = urls.filter(u => !deletedUrls.has(u));
+        if (remaining.length > 0) kept.photographers[name] = remaining;
+    }
+    for (const [name, urls] of Object.entries(categoryData)) {
+        const remaining = urls.filter(u => !deletedUrls.has(u));
+        if (remaining.length > 0) kept.categories[name] = remaining;
+    }
+    kept.researchBoards = {};
+    for (const [name, urls] of Object.entries(researchBoardsData)) {
+        const remaining = urls.filter(u => !deletedUrls.has(u));
+        if (remaining.length > 0) kept.researchBoards[name] = remaining;
+    }
+    const blob = new Blob([JSON.stringify(kept, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'belnu_curated_images.json';
+    a.click();
+}
+
+function updateCollection() {
+    if (deletedUrls.size === 0) { alert('No images have been removed yet. Use CURATE mode to select and remove images first.'); return; }
+    if (!confirm('This will bake ' + deletedUrls.size + ' deletion(s) permanently into a new version of the file.\n\nDownload the file and replace your current BELNU_Image_Review.html — then those images will be gone for good.\n\nContinue?')) return;
+
+    // Temporarily clear dynamic content so outerHTML captures clean empty containers
+    const tabsEl = document.getElementById('tabs');
+    const contentEl = document.getElementById('content');
+    const savedTabsHtml = tabsEl.innerHTML;
+    const savedContentHtml = contentEl.innerHTML;
+    const savedBodyClass = document.body.className;
+
+    tabsEl.innerHTML = '';
+    contentEl.innerHTML = '';
+    document.body.className = '';
+
+    const html = document.documentElement.outerHTML;
+
+    // Restore live state immediately (sync, no flicker)
+    tabsEl.innerHTML = savedTabsHtml;
+    contentEl.innerHTML = savedContentHtml;
+    document.body.className = savedBodyClass;
+
+    // Build new data blocks with deleted URLs removed
+    const newPhotographer = {};
+    for (const [name, urls] of Object.entries(photographerData)) {
+        const kept = urls.filter(u => !deletedUrls.has(u));
+        if (kept.length > 0) newPhotographer[name] = kept;
+    }
+    const newCategory = {};
+    for (const [name, urls] of Object.entries(categoryData)) {
+        const kept = urls.filter(u => !deletedUrls.has(u));
+        if (kept.length > 0) newCategory[name] = kept;
+    }
+    const newSimilar = {};
+    for (const [name, urls] of Object.entries(similarFindsData)) {
+        const kept = urls.filter(u => !deletedUrls.has(u));
+        if (kept.length > 0) newSimilar[name] = kept;
+    }
+    const newResearch = {};
+    for (const [name, urls] of Object.entries(researchBoardsData)) {
+        const kept = urls.filter(u => !deletedUrls.has(u));
+        if (kept.length > 0) newResearch[name] = kept;
+    }
+
+    // Serialize with proper formatting
+    const indent = '    ';
+    function serializeData(obj) {
+        const entries = Object.entries(obj);
+        if (entries.length === 0) return '{}';
+        let s = '{\n';
+        entries.forEach(([key, urls], idx) => {
+            s += indent + JSON.stringify(key) + ': [\n';
+            urls.forEach((u, ui) => {
+                s += indent + indent + JSON.stringify(u) + (ui < urls.length - 1 ? ',' : '') + '\n';
+            });
+            s += indent + ']' + (idx < entries.length - 1 ? ',' : '') + '\n';
+        });
+        s += '}';
+        return s;
+    }
+
+    // Replace the data blocks in the HTML source
+    let updated = html;
+
+    // Replace photographerData
+    updated = updated.replace(
+        /const photographerData = \{[\s\S]*?\n\};/,
+        'const photographerData = ' + serializeData(newPhotographer) + ';'
+    );
+    // Replace categoryData
+    updated = updated.replace(
+        /const categoryData = \{[\s\S]*?\n\};/,
+        'const categoryData = ' + serializeData(newCategory) + ';'
+    );
+    // Replace similarFindsData
+    updated = updated.replace(
+        /const similarFindsData = \{[\s\S]*?\n\};/,
+        'const similarFindsData = ' + serializeData(newSimilar) + ';'
+    );
+
+    // Replace researchBoardsData
+    updated = updated.replace(
+        /const researchBoardsData = \{[\s\S]*?\n\};/,
+        'const researchBoardsData = ' + serializeData(newResearch) + ';'
+    );
+
+    // Reset deletedUrls in the new file (clear the set so it starts fresh)
+    updated = updated.replace(
+        /let deletedUrls = new Set\([^)]*\);/,
+        'let deletedUrls = new Set();'
+    );
+
+    // Download updated HTML
+    const blob = new Blob(['<!DOCTYPE html>\n' + updated], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'BELNU_Image_Review.html';
+    a.click();
+
+    // Clear localStorage and in-memory state — the downloaded file is now the source of truth
+    try { localStorage.removeItem('belnu_review_deleted'); } catch(e) {}
+    deletedUrls.clear();
+    undoStack = [];
+    refreshUpdateBtn();
+    renderContent();
+    URL.revokeObjectURL(a.href);
+}
+
+// ── Find Similar ──
+
+function getSectionForUrl(url) {
+    for (const [name, urls] of Object.entries(photographerData)) {
+        if (urls.includes(url)) return { name, type: 'photographer' };
+    }
+    for (const [name, urls] of Object.entries(categoryData)) {
+        if (urls.includes(url)) return { name: name.replace(/^\d+_/, '').replace(/_/g, ' '), type: 'category' };
+    }
+    for (const [name, urls] of Object.entries(researchBoardsData)) {
+        if (urls.includes(url)) return { name, type: 'photographer' };
+    }
+    return { name: 'Unknown', type: 'unknown' };
+}
+
+function getIndexInSection(url) {
+    for (const [name, urls] of Object.entries(photographerData)) {
+        const idx = urls.indexOf(url);
+        if (idx !== -1) return { idx: idx + 1, total: urls.length };
+    }
+    for (const [name, urls] of Object.entries(categoryData)) {
+        const idx = urls.indexOf(url);
+        if (idx !== -1) return { idx: idx + 1, total: urls.length };
+    }
+    for (const [name, urls] of Object.entries(researchBoardsData)) {
+        const idx = urls.indexOf(url);
+        if (idx !== -1) return { idx: idx + 1, total: urls.length };
+    }
+    return { idx: 0, total: 0 };
+}
+
+function openFindSimilar() {
+    const url = currentUrls[lbIndex];
+    if (!url) return;
+    fsCurrentUrl = url;
+    const section = getSectionForUrl(url);
+    fsCurrentSection = section.name;
+    const pos = getIndexInSection(url);
+
+    document.getElementById('fsThumbImg').src = url;
+    document.getElementById('fsThumbSection').textContent = section.name;
+    document.getElementById('fsThumbIndex').textContent = 'Image ' + pos.idx + ' of ' + pos.total;
+
+    // Reset form
+    document.getElementById('fsCount').value = 5;
+    document.getElementById('fsCountVal').textContent = '5';
+    document.getElementById('fsNote').value = '';
+    document.querySelectorAll('.fs-radio').forEach(r => r.classList.remove('selected'));
+    document.querySelector('.fs-radio[data-value="same"]').classList.add('selected');
+
+    document.getElementById('fsOverlay').classList.add('open');
+}
+
+function closeFindSimilar() {
+    document.getElementById('fsOverlay').classList.remove('open');
+}
+
+function selectFsRadio(el) {
+    el.parentElement.querySelectorAll('.fs-radio').forEach(r => r.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+function submitFindSimilar() {
+    const count = parseInt(document.getElementById('fsCount').value);
+    const source = document.querySelector('.fs-radio.selected').dataset.value;
+    const note = document.getElementById('fsNote').value.trim();
+
+    const request = {
+        id: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        url: fsCurrentUrl,
+        section: fsCurrentSection,
+        count: count,
+        source: source,  // "same", "new", or "any"
+        note: note,
+        timestamp: new Date().toISOString()
+    };
+
+    similarQueue.push(request);
+    closeFindSimilar();
+    updateQueueUI();
+    renderContent();
+    autoSaveQueue();
+    showQueueToast(count, source);
+}
+
+function showQueueToast(count, source) {
+    const sourceLabel = source === 'same' ? 'same photographer' : source === 'new' ? 'new photographers' : 'any source';
+    clearTimeout(undoTimer);
+    const toast = document.getElementById('undoToast');
+    document.getElementById('undoMsg').textContent = 'Queued: find ' + count + ' similar from ' + sourceLabel + ' — save file to Belnu folder';
+    toast.classList.add('visible');
+    undoTimer = setTimeout(() => toast.classList.remove('visible'), 5000);
+}
+
+function updateQueueUI() {
+    const toggle = document.getElementById('queueToggle');
+    const badge = document.getElementById('qBadge');
+    const total = similarQueue.length + generateQueue.length;
+    if (total > 0) {
+        toggle.classList.add('has-items');
+        badge.textContent = total;
+    } else {
+        toggle.classList.remove('has-items');
+    }
+    renderQueueList();
+}
+
+function toggleQueueDrawer() {
+    document.getElementById('queueDrawer').classList.toggle('open');
+}
+
+function renderQueueList() {
+    const list = document.getElementById('queueList');
+    const total = similarQueue.length + generateQueue.length;
+    if (total === 0) {
+        list.innerHTML = '<div class="queue-empty">No requests yet. Open an image and click<br>"Find Similar" or "Generate Similar" to add one.</div>';
+        return;
+    }
+    list.innerHTML = '';
+
+    // Similar requests
+    similarQueue.forEach((req, i) => {
+        const sourceLabel = req.source === 'same' ? 'Same photographer' : req.source === 'new' ? 'New photographers' : 'Any source';
+        const item = document.createElement('div');
+        item.className = 'queue-item';
+        item.style.borderLeftColor = '#ffffff';
+        item.style.borderLeftWidth = '3px';
+        item.innerHTML = `
+            <img src="${req.url}" alt="">
+            <div class="queue-item-info">
+                <div class="qi-section" style="color:#ffffff;">FIND &middot; ${req.section}</div>
+                <div class="qi-detail"><strong>${req.count}</strong> similar &middot; ${sourceLabel}</div>
+                ${req.note ? '<div class="qi-note">' + req.note + '</div>' : ''}
+            </div>
+            <button class="queue-item-remove" onclick="removeFromQueue('similar',${i})">&times;</button>
+        `;
+        list.appendChild(item);
+    });
+
+    // Generate requests
+    generateQueue.forEach((req, i) => {
+        const typeLabels = { similar: 'Similar style', ambient: 'Ambient', lifestyle: 'Lifestyle', fragrance: req.fragrance || 'Fragrance' };
+        const item = document.createElement('div');
+        item.className = 'queue-item';
+        item.style.borderLeftColor = '#82b48c';
+        item.style.borderLeftWidth = '3px';
+        item.innerHTML = `
+            <img src="${req.url}" alt="">
+            <div class="queue-item-info">
+                <div class="qi-section" style="color:#82b48c;">GENERATE &middot; ${req.section}</div>
+                <div class="qi-detail"><strong>${req.count}</strong> &times; ${typeLabels[req.type]}</div>
+                ${req.note ? '<div class="qi-note">' + req.note + '</div>' : ''}
+            </div>
+            <button class="queue-item-remove" onclick="removeFromQueue('generate',${i})">&times;</button>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function removeFromQueue(type, index) {
+    if (type === 'similar') similarQueue.splice(index, 1);
+    else generateQueue.splice(index, 1);
+    updateQueueUI();
+    renderContent();
+}
+
+function clearQueue() {
+    const total = similarQueue.length + generateQueue.length;
+    if (total === 0) return;
+    if (!confirm('Clear all ' + total + ' requests from the queue?')) return;
+    similarQueue = [];
+    generateQueue = [];
+    updateQueueUI();
+    renderContent();
+}
+
+function buildQueueData() {
+    return {
+        exported: new Date().toISOString(),
+        totalRequests: similarQueue.length + generateQueue.length,
+        findSimilar: {
+            count: similarQueue.length,
+            totalImagesRequested: similarQueue.reduce((sum, r) => sum + r.count, 0),
+            outputFolder: "01_INBOX/Similar_Finds/",
+            requests: similarQueue.map(r => ({
+                id: r.id,
+                referenceImage: r.url,
+                section: r.section,
+                count: r.count,
+                sourcePreference: r.source,
+                note: r.note || null,
+                status: r.status || "pending"
+            }))
+        },
+        generateSimilar: {
+            count: generateQueue.length,
+            totalImagesRequested: generateQueue.reduce((sum, r) => sum + r.count, 0),
+            outputFolder: "04_GENERATION/Similar/",
+            requests: generateQueue.map(r => ({
+                id: r.id,
+                referenceImage: r.url,
+                section: r.section,
+                type: r.type,
+                fragrance: r.fragrance,
+                count: r.count,
+                note: r.note || null,
+                status: r.status || "pending"
+            }))
+        }
+    };
+}
+
+function autoSaveQueue() {
+    // Auto-download the queue JSON so the scheduled task can pick it up
+    const data = buildQueueData();
+    if (data.totalRequests === 0) return;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '_belnu_queue.json';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+}
+
+function exportQueue() {
+    const total = similarQueue.length + generateQueue.length;
+    if (total === 0) return;
+    const data = buildQueueData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'belnu_image_queue.json';
+    a.click();
+}
+
+// ── Zoom ──
+
+let zoomScale = 1;
+const zoomSteps = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+
+function zoomImage(dir) {
+    if (dir === 0) {
+        zoomScale = 1;
+    } else {
+        const curIdx = zoomSteps.reduce((best, s, i) =>
+            Math.abs(s - zoomScale) < Math.abs(zoomSteps[best] - zoomScale) ? i : best, 0);
+        const newIdx = Math.max(0, Math.min(zoomSteps.length - 1, curIdx + dir));
+        zoomScale = zoomSteps[newIdx];
+    }
+    applyZoom();
+}
+
+function applyZoom() {
+    const img = document.getElementById('lbImg');
+    img.style.transform = 'scale(' + zoomScale + ')';
+    document.getElementById('zoomLevel').textContent = Math.round(zoomScale * 100) + '%';
+}
+
+function resetZoom() {
+    zoomScale = 1;
+    applyZoom();
+}
+
+// ── Generate Similar ──
+
+let generateQueue = [];
+let gsCurrentUrl = null;
+let gsCurrentSection = null;
+
+function openGenerateSimilar() {
+    const url = currentUrls[lbIndex];
+    if (!url) return;
+    gsCurrentUrl = url;
+    const section = getSectionForUrl(url);
+    gsCurrentSection = section.name;
+    const pos = getIndexInSection(url);
+
+    document.getElementById('gsThumbImg').src = url;
+    document.getElementById('gsThumbSection').textContent = section.name;
+    document.getElementById('gsThumbIndex').textContent = 'Image ' + pos.idx + ' of ' + pos.total;
+
+    // Reset form
+    document.getElementById('gsCount').value = 3;
+    document.getElementById('gsCountVal').textContent = '3';
+    document.getElementById('gsNote').value = '';
+    document.querySelectorAll('.gs-type-card').forEach(c => c.classList.remove('selected'));
+    document.querySelector('.gs-type-card[data-value="similar"]').classList.add('selected');
+    document.getElementById('gsFragField').style.display = 'none';
+    document.querySelectorAll('.gs-frag-chip').forEach(c => c.classList.remove('selected'));
+    document.querySelector('.gs-frag-chip[data-frag="Rose Steady"]').classList.add('selected');
+
+    document.getElementById('gsOverlay').classList.add('open');
+}
+
+function closeGenerateSimilar() {
+    document.getElementById('gsOverlay').classList.remove('open');
+}
+
+function selectGsType(el) {
+    el.parentElement.querySelectorAll('.gs-type-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const val = el.dataset.value;
+    document.getElementById('gsFragField').style.display = val === 'fragrance' ? 'block' : 'none';
+}
+
+function selectFrag(el) {
+    el.parentElement.querySelectorAll('.gs-frag-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+function submitGenerateSimilar() {
+    const type = document.querySelector('.gs-type-card.selected').dataset.value;
+    const count = parseInt(document.getElementById('gsCount').value);
+    const note = document.getElementById('gsNote').value.trim();
+    const fragEl = document.querySelector('.gs-frag-chip.selected');
+    const fragrance = type === 'fragrance' && fragEl ? fragEl.dataset.frag : null;
+
+    const request = {
+        id: 'gen_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        action: 'generate',
+        url: gsCurrentUrl,
+        section: gsCurrentSection,
+        type: type,
+        fragrance: fragrance,
+        count: count,
+        note: note,
+        timestamp: new Date().toISOString()
+    };
+
+    generateQueue.push(request);
+    closeGenerateSimilar();
+    updateQueueUI();
+    renderContent();
+    autoSaveQueue();
+
+    const typeLabels = { similar: 'similar style', ambient: 'ambient', lifestyle: 'lifestyle', fragrance: fragrance };
+    clearTimeout(undoTimer);
+    const toast = document.getElementById('undoToast');
+    document.getElementById('undoMsg').textContent = 'Queued: generate ' + count + ' ' + typeLabels[type] + ' image' + (count > 1 ? 's' : '');
+    toast.classList.add('visible');
+    undoTimer = setTimeout(() => toast.classList.remove('visible'), 4000);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+    const fsOpen = document.getElementById('fsOverlay').classList.contains('open');
+    const gsOpen = document.getElementById('gsOverlay').classList.contains('open');
+    const lb = document.getElementById('lightbox');
+
+    if (gsOpen) {
+        if (e.key === 'Escape') closeGenerateSimilar();
+        if (e.key === 'Enter') { submitGenerateSimilar(); e.preventDefault(); }
+        return;
+    }
+    if (fsOpen) {
+        if (e.key === 'Escape') closeFindSimilar();
+        if (e.key === 'Enter') { submitFindSimilar(); e.preventDefault(); }
+        return;
+    }
+    if (lb.classList.contains('open')) {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') navLightbox(-1);
+        if (e.key === 'ArrowRight') navLightbox(1);
+        if (e.key === 'Delete' || e.key === 'Backspace') { if (deleteMode) deleteCurrent(); }
+        if (e.key === 'f' || e.key === 'F') openFindSimilar();
+        if (e.key === 'g' || e.key === 'G') openGenerateSimilar();
+        if (e.key === '+' || e.key === '=') zoomImage(1);
+        if (e.key === '-' || e.key === '_') zoomImage(-1);
+        if (e.key === '0') zoomImage(0);
+    } else {
+        if (e.key === 'Escape' && deleteMode) toggleDeleteMode();
+    }
+});
+
+// View size toggle
+document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.onclick = () => {
+        gridSize = btn.dataset.size;
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderContent();
+    };
+});
+
+// Load persisted deletions from localStorage
+try {
+    const saved = localStorage.getItem('belnu_review_deleted');
+    if (saved) {
+        const arr = JSON.parse(saved);
+        arr.forEach(u => deletedUrls.add(u));
+    }
+} catch(e) {}
+refreshUpdateBtn();
+
+// Initial render
+renderContent();
+</script>
+
+
+</body></html>
